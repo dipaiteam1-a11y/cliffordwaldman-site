@@ -1,0 +1,13 @@
+---
+/**
+ * Renders a plain string, highlighting "[Clifford's … here]" style placeholders.
+ * Use for frontmatter text (titles, summaries) that isn't processed as Markdown.
+ */
+import { splitPlaceholders } from '../lib/format';
+interface Props {
+  text?: string;
+}
+const parts = splitPlaceholders(Astro.props.text ?? '');
+---
+
+{parts.map((p) => (p.placeholder ? <mark class="placeholder">{p.text}</mark> : p.text))}

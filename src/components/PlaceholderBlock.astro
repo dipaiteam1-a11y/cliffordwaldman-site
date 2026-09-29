@@ -1,0 +1,12 @@
+---
+/** A clearly marked slot for content Clifford still needs to provide. */
+interface Props {
+  label?: string;
+}
+const { label = 'Placeholder' } = Astro.props;
+---
+
+<div class="placeholder-block" role="note">
+  <strong>{label}</strong>
+  <slot />
+</div>

@@ -1,0 +1,44 @@
+---
+import { getCollection, getEntry, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SongCard from '../../../components/SongCard.astro';
+import Rich from '../../../components/Rich.astro';
+import { formatDate } from '../../../lib/format';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('stories');
+  return stories.map((story) => ({ params: { slug: story.id }, props: { story } }));
+}
+
+interface Props {
+  story: CollectionEntry<'stories'>;
+}
+const { story } = Astro.props;
+const d = story.data;
+const { Content } = await render(story);
+const song = d.song ? await getEntry(d.song) : undefined;
+const chapter = d.chapter ? await getEntry(d.chapter) : undefined;
+---
+
+<BaseLayout title={d.title} description={d.summary} section="/lollipop-cruise">
+  <article class="wrap wrap-narrow chapter-page">
+    <a class="back-link" href="/lollipop-cruise#stories">Stories</a>
+    <span class="eyebrow">A Lollipop Cruise story</span>
+    <h1><Rich text={d.title} /></h1>
+    {d.date && <p class="meta"><time datetime={d.date.toISOString()}>{formatDate(d.date)}</time></p>}
+    {chapter && <p>From <a href={`/lollipop-cruise/chapters/${chapter.id}`}><Rich text={chapter.data.title} /></a></p>}
+    {d.artwork && <img class="story-art" src={d.artwork.src} alt={d.artwork.alt} />}
+    <div class="prose"><Content /></div>
+
+    {
+      song && !song.data.draft && (
+        <section class="section-block" aria-labelledby="song-h">
+          <h2 id="song-h">The song</h2>
+          <div class="grid grid-2">
+            <SongCard song={song} />
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

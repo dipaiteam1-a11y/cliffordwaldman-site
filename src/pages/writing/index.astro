@@ -1,0 +1,100 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Rich from '../../components/Rich.astro';
+import { formatDate } from '../../lib/format';
+
+const all = (await getCollection('writing', ({ data }) => !data.draft)).sort(
+  (a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0),
+);
+const bookOfSongs = all.find((w) => w.data.kind === 'book-of-songs');
+const sections = [
+  { kind: 'essay', title: 'Essays', blurb: 'Shorter pieces on music, psychology, faith and the creative life.' },
+  { kind: 'book', title: 'Books', blurb: 'Longer works, published and in progress.' },
+  { kind: 'literary', title: 'Literary work', blurb: 'Poems, stories and other literary pieces.' },
+  { kind: 'future', title: 'Future writing', blurb: "What's on the desk and still to come." },
+] as const;
+const statusLabel: Record<string, string> = { published: '', 'in-development': 'In development', planned: 'Planned' };
+---
+
+<BaseLayout title="Writing & Books" description="Essays, books and literary work by Clifford Waldman, including the Book of Songs, now in development.">
+  <PageHero eyebrow="Writing & Books" title="Words on the page" lede="Essays, books and literary work, and the Book of Songs, which is taking shape now." />
+
+  <div class="wrap">
+    {
+      bookOfSongs && (
+        <section class="bos card" aria-labelledby="bos-h">
+          <span class="eyebrow">Featured · {statusLabel[bookOfSongs.data.status] || 'Book'}</span>
+          <h2 id="bos-h">
+            <a href={`/writing/${bookOfSongs.id}`}>
+              <Rich text={bookOfSongs.data.title} />
+            </a>
+          </h2>
+          <p>
+            <Rich text={bookOfSongs.data.summary} />
+          </p>
+          <span class="link-arrow meta" aria-hidden="true">
+            Read about the book
+          </span>
+        </section>
+      )
+    }
+
+    {
+      sections.map((s) => {
+        const list = all.filter((w) => w.data.kind === s.kind);
+        return (
+          <section class="section w-section" aria-labelledby={`${s.kind}-h`}>
+            <div class="section-head">
+              <h2 id={`${s.kind}-h`}>{s.title}</h2>
+              <p>{s.blurb}</p>
+            </div>
+            {list.length ? (
+              <div class="grid grid-2">
+                {list.map((w) => (
+                  <article class="card">
+                    <h3>
+                      <a href={`/writing/${w.id}`}>
+                        <Rich text={w.data.title} />
+                      </a>
+                    </h3>
+                    <p>
+                      <Rich text={w.data.summary} />
+                    </p>
+                    <div class="meta">
+                      {statusLabel[w.data.status] && <span class="pill pill-future">{statusLabel[w.data.status]}</span>}
+                      {w.data.date && <time datetime={w.data.date.toISOString()}>{formatDate(w.data.date)}</time>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p class="empty-state">Nothing here yet. Check back soon.</p>
+            )}
+          </section>
+        );
+      })
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .bos {
+    --accent: var(--door-writing);
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background:
+      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--door-writing) 14%, transparent), transparent 55%),
+      var(--bg-raised);
+  }
+  .bos h2 {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+  }
+  .bos p {
+    font-size: 1.15rem;
+    max-width: 38rem;
+  }
+  .w-section {
+    padding-block: 3rem 0.5rem;
+  }
+</style>

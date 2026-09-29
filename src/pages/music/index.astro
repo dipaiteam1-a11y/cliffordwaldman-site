@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SongCard from '../../components/SongCard.astro';
+
+const songs = (await getCollection('songs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+
+const groups = [
+  { key: 'lollipop-cruise', title: 'Lollipop Cruise', blurb: 'Songs from the Lollipop Cruise universe.', more: { href: '/lollipop-cruise', label: 'Explore the Lollipop Cruise' } },
+  { key: 'book-of-songs', title: 'The Book of Songs', blurb: 'Songs gathered for the Book of Songs, now in development.', more: { href: '/writing/book-of-songs', label: 'About the Book of Songs' } },
+  { key: 'single', title: 'More songs', blurb: 'Songs that stand on their own.' },
+] as const;
+---
+
+<BaseLayout title="Music & Lyrics" description="Songs by Clifford Waldman, with the exact lyrics shown beside the music and highlighted in time.">
+  <PageHero
+    eyebrow="Music & Lyrics"
+    title="Songs, with the words beside them"
+    lede="Open any song to hear it with its lyrics. The current line lights up as it's sung, and you can select a line to jump straight to it."
+  >
+    <div class="btn-row">
+      <a class="btn btn-ghost" href="/videos">Music videos</a>
+      <a class="btn btn-ghost" href="/lollipop-cruise">Lollipop Cruise</a>
+    </div>
+  </PageHero>
+
+  <div class="wrap">
+    <nav class="jump" aria-label="Song collections">
+      {groups.map((g) => songs.some((s) => s.data.collection === g.key) && <a href={`#${g.key}`}>{g.title}</a>)}
+    </nav>
+
+    {
+      groups.map((g) => {
+        const list = songs.filter((s) => s.data.collection === g.key);
+        if (!list.length) return null;
+        return (
+          <section class="section group" id={g.key} aria-labelledby={`${g.key}-h`}>
+            <div class="section-head">
+              <h2 id={`${g.key}-h`}>{g.title}</h2>
+              <p>{g.blurb}</p>
+              {'more' in g && g.more && (
+                <a class="link-arrow" href={g.more.href}>
+                  {g.more.label}
+                </a>
+              )}
+            </div>
+            <div class="grid grid-3">
+              {list.map((song) => (
+                <SongCard song={song} />
+              ))}
+            </div>
+          </section>
+        );
+      })
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .jump a {
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .jump a:hover {
+    background: var(--accent-wash);
+  }
+  .group {
+    padding-block: 3rem 1rem;
+  }
+</style>

@@ -1,0 +1,155 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SignupForm from '../../components/SignupForm.astro';
+import { community } from '../../lib/community';
+
+const page = (await getEntry('pages', 'community'))!;
+const { Content } = await render(page);
+const glyph: Record<string, string> = { discussion: '❝', forum: '⌂', qa: '?', learning: '✎', contributors: '✦' };
+---
+
+<BaseLayout title="The Gathering Place" description={page.data.description}>
+  <section class="gp-hero">
+    <div class="gp-glow" aria-hidden="true"></div>
+    <div class="wrap wrap-narrow gp-inner">
+      <span class="eyebrow">{page.data.eyebrow}</span>
+      <h1>The Gathering Place</h1>
+      <p class="lede">
+        The heart of this whole site: a place to talk, ask, learn and create together. The doors are being hung and the
+        lamps are being lit. It opens soon.
+      </p>
+      <div class="prose gp-welcome"><Content /></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="coming-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">What's coming</span>
+        <h2 id="coming-h">Rooms in the house</h2>
+        <p>When the community opens, these are the places you'll find inside.</p>
+      </div>
+      <ul class="spaces">
+        {
+          community.spaces.map((s) => (
+            <li class="space">
+              <span class="space-glyph" aria-hidden="true">
+                {glyph[s.kind]}
+              </span>
+              <h3>{s.title}</h3>
+              <p>{s.description}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section-sunk" aria-labelledby="join-h">
+    <div class="wrap join-grid">
+      <div>
+        <span class="eyebrow">Be first through the door</span>
+        <h2 id="join-h">Join the mailing list</h2>
+        <p>
+          Sign up and you'll get an invitation when the Gathering Place opens, plus an occasional letter with new songs,
+          writing and events.
+        </p>
+      </div>
+      <div class="card">
+        <SignupForm name="gathering-list" id="community-signup" submitLabel="Save me a seat" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .gp-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: clamp(4rem, 10vw, 7rem) clamp(2.5rem, 6vw, 4rem);
+    text-align: center;
+  }
+  .gp-glow {
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: min(110vw, 60rem);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--hearth-1) 55%, transparent) 0%, color-mix(in srgb, var(--hearth-2) 18%, transparent) 35%, transparent 62%);
+    z-index: -1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gp-glow {
+      animation: breathe 7s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes breathe {
+    from {
+      opacity: 0.75;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .gp-inner h1 {
+    margin-inline: auto;
+    max-width: none;
+  }
+  .gp-inner .lede {
+    margin-inline: auto;
+  }
+  .gp-welcome {
+    margin: 1.5rem auto 0;
+    color: var(--ink-soft);
+  }
+  .spaces {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  }
+  .space {
+    padding: 1.5rem;
+    border-radius: 50% 50% var(--radius) var(--radius) / 5rem 5rem var(--radius) var(--radius);
+    border: 1.5px dashed var(--line-strong);
+    text-align: center;
+  }
+  .space-glyph {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin: 0.5rem auto 0.75rem;
+    border-radius: 50%;
+    background: var(--accent-wash);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+  }
+  .space h3 {
+    font-size: 1.3rem;
+  }
+  .space p {
+    color: var(--ink-soft);
+    font-size: 1rem;
+    margin: 0;
+  }
+  .join-grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  @media (min-width: 56rem) {
+    .join-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .join-grid p {
+    color: var(--ink-soft);
+  }
+</style>

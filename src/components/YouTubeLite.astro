@@ -1,0 +1,119 @@
+---
+/**
+ * Lightweight YouTube embed: shows a thumbnail and only loads YouTube's player
+ * (and its cookies/scripts) after the visitor clicks play.
+ */
+import { youtubeId } from '../lib/youtube';
+interface Props {
+  video?: string;
+  title: string;
+}
+const { video, title } = Astro.props;
+const id = youtubeId(video);
+---
+
+{
+  id ? (
+    <youtube-lite class="yt" data-id={id} data-title={title}>
+      <button type="button" class="yt-btn">
+        <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" decoding="async" width="480" height="360" />
+        <span class="yt-play" aria-hidden="true">
+          <svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.5 7.7A8.5 8.5 0 0 0 60.5 1.7C55.2.3 34 .3 34 .3s-21.2 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6c5.3 1.4 26.5 1.4 26.5 1.4s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="currentColor"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
+        </span>
+        <span class="visually-hidden">Play video: {title}</span>
+      </button>
+      <noscript>
+        <a href={`https://www.youtube.com/watch?v=${id}`}>Watch “{title}” on YouTube</a>
+      </noscript>
+    </youtube-lite>
+  ) : (
+    <div class="yt yt-empty" role="note">
+      <span class="yt-empty-icon" aria-hidden="true">▶</span>
+      <mark class="placeholder">[TODO: YouTube link for “{title}”]</mark>
+    </div>
+  )
+}
+
+<script>
+  class YouTubeLite extends HTMLElement {
+    connectedCallback() {
+      const btn = this.querySelector('button');
+      btn?.addEventListener('click', () => {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube-nocookie.com/embed/${this.dataset.id}?autoplay=1&rel=0`;
+        iframe.title = this.dataset.title || 'YouTube video';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        this.replaceChildren(iframe);
+        iframe.focus();
+      });
+    }
+  }
+  if (!customElements.get('youtube-lite')) customElements.define('youtube-lite', YouTubeLite);
+</script>
+
+<style>
+  .yt {
+    display: block;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+  }
+  .yt :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .yt-btn {
+    all: unset;
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  .yt-btn:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: -3px;
+  }
+  .yt-btn img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.92;
+    transition: opacity 0.2s;
+  }
+  .yt-btn:hover img {
+    opacity: 1;
+  }
+  .yt-play {
+    position: relative;
+    color: #c4302b;
+    filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.4));
+  }
+  .yt-btn:hover .yt-play {
+    color: #ff0000;
+  }
+  .yt-empty {
+    background: var(--bg-sunk);
+    border: 2px dashed var(--line-strong);
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  .yt-empty-icon {
+    font-size: 2rem;
+    color: var(--ink-faint);
+  }
+</style>

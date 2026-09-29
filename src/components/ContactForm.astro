@@ -1,0 +1,85 @@
+---
+/**
+ * Contact form. Uses Netlify Forms by default; if PUBLIC_CONTACT_FORM_ENDPOINT is
+ * set (e.g. a Formspree URL) the form posts there instead. See src/config/site.ts.
+ */
+import { forms } from '../config/site';
+
+interface Props {
+  /** Pre-select a topic, e.g. "professional". Visitors can also use ?topic=… */
+  topic?: string;
+  /** Show the "don't send health details" notice above the message box. */
+  healthNotice?: boolean;
+  id?: string;
+}
+const { topic = 'general', healthNotice = false, id = 'contact-form' } = Astro.props;
+const endpoint = forms.contactEndpoint;
+const netlify = !endpoint;
+---
+
+<form
+  class="form"
+  id={id}
+  name="contact"
+  method="POST"
+  action={netlify ? forms.thanksPage : endpoint}
+  data-netlify={netlify ? 'true' : undefined}
+  netlify-honeypot={netlify ? 'bot-field' : undefined}
+  data-topic-form
+>
+  {netlify && <input type="hidden" name="form-name" value="contact" />}
+  <p class="honeypot">
+    <label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+  </p>
+
+  <div class="field">
+    <label for={`${id}-name`}>Your name</label>
+    <input id={`${id}-name`} name="name" type="text" autocomplete="name" required />
+  </div>
+
+  <div class="field">
+    <label for={`${id}-email`}>Email</label>
+    <input id={`${id}-email`} name="email" type="email" autocomplete="email" required />
+  </div>
+
+  <div class="field">
+    <label for={`${id}-topic`}>What is this about?</label>
+    <select id={`${id}-topic`} name="topic" required>
+      {forms.contactTopics.map((t) => <option value={t.value} selected={t.value === topic}>{t.label}</option>)}
+    </select>
+  </div>
+
+  {
+    healthNotice && (
+      <div class="notice notice-quiet" id={`${id}-privacy`}>
+        <strong>Please keep it brief and general.</strong>
+        <p>
+          Don't include personal health details, diagnoses or anything confidential in this form. Email and web forms
+          are not a secure channel for clinical information. A short note about what you're looking for and how to
+          reach you is plenty.
+        </p>
+      </div>
+    )
+  }
+
+  <div class="field">
+    <label for={`${id}-message`}>Message</label>
+    <textarea id={`${id}-message`} name="message" required aria-describedby={healthNotice ? `${id}-privacy` : undefined}></textarea>
+  </div>
+
+  <div>
+    <button class="btn" type="submit">Send message</button>
+  </div>
+</form>
+
+<script>
+  // Pre-select the topic from ?topic=… (e.g. links from the Workshops page).
+  const params = new URLSearchParams(location.search);
+  const t = params.get('topic');
+  if (t) {
+    document.querySelectorAll<HTMLFormElement>('[data-topic-form]').forEach((f) => {
+      const sel = f.querySelector<HTMLSelectElement>('select[name="topic"]');
+      if (sel && Array.from(sel.options).some((o) => o.value === t)) sel.value = t;
+    });
+  }
+</script>

@@ -1,0 +1,381 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SongCard from '../../components/SongCard.astro';
+import Rich from '../../components/Rich.astro';
+
+const intro = (await getEntry('pages', 'lollipop-cruise'))!;
+const { Content: Intro } = await render(intro);
+
+const chapters = (await getCollection('chapters')).sort((a, b) => a.data.order - b.data.order);
+const current = chapters.filter((c) => c.data.status !== 'future');
+const future = chapters.filter((c) => c.data.status === 'future');
+const characters = (await getCollection('characters')).sort((a, b) => a.data.order - b.data.order);
+const stories = (await getCollection('stories')).sort((a, b) => a.data.order - b.data.order);
+const songs = (await getCollection('songs', ({ data }) => !data.draft && data.collection === 'lollipop-cruise')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+// Group chapters into Parts
+const parts = new Map<number, { title?: string; chapters: typeof chapters }>();
+for (const c of current) {
+  const p = parts.get(c.data.part) ?? { title: c.data.partTitle, chapters: [] };
+  p.chapters.push(c);
+  parts.set(c.data.part, p);
+}
+
+// Artwork gallery: everything in this universe that has art
+const gallery = [
+  { src: '/images/lollipop/cover.svg', alt: 'Lollipop Cruise cover artwork (placeholder)', caption: 'Lollipop Cruise', href: undefined as string | undefined },
+  ...chapters.filter((c) => c.data.artwork).map((c) => ({ ...c.data.artwork!, caption: c.data.title, href: `/lollipop-cruise/chapters/${c.id}` })),
+  ...characters.filter((c) => c.data.artwork).map((c) => ({ ...c.data.artwork!, caption: c.data.name, href: `/lollipop-cruise/characters/${c.id}` })),
+  ...stories.filter((s) => s.data.artwork).map((s) => ({ ...s.data.artwork!, caption: s.data.title, href: `/lollipop-cruise/stories/${s.id}` })),
+];
+
+const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In progress', future: 'Coming' };
+---
+
+<BaseLayout title="Lollipop Cruise" description={intro.data.description} image="/images/lollipop/cover.svg">
+  <section class="lc-hero">
+    <div class="wrap lc-hero-grid">
+      <div>
+        <span class="eyebrow">{intro.data.eyebrow}</span>
+        <h1>Lollipop Cruise</h1>
+        <div class="prose lc-intro"><Intro /></div>
+        <nav class="lc-jump" aria-label="In the Lollipop Cruise">
+          <a href="#chapters">Chapters</a>
+          <a href="#characters">Characters</a>
+          <a href="#stories">Stories</a>
+          <a href="#songs">Songs</a>
+          <a href="#artwork">Artwork</a>
+          <a href="#future">Future chapters</a>
+        </nav>
+      </div>
+      <div class="lc-cover">
+        <img src="/images/lollipop/cover.svg" alt="Lollipop Cruise cover artwork (placeholder)" width="600" height="600" />
+      </div>
+    </div>
+  </section>
+
+  <section id="chapters" class="section" aria-labelledby="chapters-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Parts & chapters</span>
+        <h2 id="chapters-h">The voyage so far</h2>
+      </div>
+      {
+        [...parts.entries()].map(([num, part]) => (
+          <div class="part">
+            <h3 class="part-title">
+              Part {num}
+              {part.title && (
+                <span class="part-sub">
+                  <Rich text={part.title} />
+                </span>
+              )}
+            </h3>
+            <ol class="chapter-list">
+              {part.chapters.map((c) => (
+                <li class="card chapter">
+                  <span class="chapter-num" aria-hidden="true">
+                    {c.data.order}
+                  </span>
+                  <div>
+                    <h4 class="chapter-title">
+                      <a href={`/lollipop-cruise/chapters/${c.id}`}>
+                        <Rich text={c.data.title} />
+                      </a>
+                    </h4>
+                    <p>
+                      <Rich text={c.data.summary} />
+                    </p>
+                    <div class="meta">
+                      {statusLabel[c.data.status] && <span class="pill pill-future">{statusLabel[c.data.status]}</span>}
+                      {c.data.songs.length > 0 && <span class="pill pill-accent">♪ {c.data.songs.length} song{c.data.songs.length > 1 ? 's' : ''}</span>}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id="characters" class="section section-sunk" aria-labelledby="characters-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Who's aboard</span>
+        <h2 id="characters-h">Characters</h2>
+      </div>
+      <div class="grid grid-3">
+        {
+          characters.map((c) => (
+            <article class="card">
+              {c.data.artwork && (
+                <div class="card-art">
+                  <img src={c.data.artwork.src} alt="" loading="lazy" width="600" height="600" />
+                </div>
+              )}
+              <h3>
+                <a href={`/lollipop-cruise/characters/${c.id}`}>
+                  <Rich text={c.data.name} />
+                </a>
+              </h3>
+              <p>
+                <Rich text={c.data.role} />
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="stories" class="section" aria-labelledby="stories-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Stories</span>
+        <h2 id="stories-h">Stories from the cruise</h2>
+        <p>Tales from this world, including the stories behind the songs.</p>
+      </div>
+      <div class="grid grid-2">
+        {
+          stories.map((s) => (
+            <article class="card">
+              <h3>
+                <a href={`/lollipop-cruise/stories/${s.id}`}>
+                  <Rich text={s.data.title} />
+                </a>
+              </h3>
+              <p>
+                <Rich text={s.data.summary} />
+              </p>
+              {s.data.song && (
+                <div class="meta">
+                  <span class="pill pill-accent">Song story</span>
+                </div>
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="songs" class="section section-sunk" aria-labelledby="songs-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Songs</span>
+        <h2 id="songs-h">Songs of the Lollipop Cruise</h2>
+      </div>
+      <div class="grid grid-3">{songs.map((song) => <SongCard song={song} />)}</div>
+    </div>
+  </section>
+
+  <section id="artwork" class="section" aria-labelledby="art-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Artwork</span>
+        <h2 id="art-h">Pictures from the voyage</h2>
+      </div>
+      <ul class="gallery">
+        {
+          gallery.map((g) => (
+            <li>
+              <figure>
+                {g.href ? (
+                  <a href={g.href}>
+                    <img src={g.src} alt={g.alt} loading="lazy" width="600" height="600" />
+                  </a>
+                ) : (
+                  <img src={g.src} alt={g.alt} loading="lazy" width="600" height="600" />
+                )}
+                <figcaption>
+                  <Rich text={g.caption} />
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section id="future" class="section section-sunk" aria-labelledby="future-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Still to come</span>
+        <h2 id="future-h">Future chapters</h2>
+        <p>The voyage isn't over. These chapters are on the horizon.</p>
+      </div>
+      <ol class="future-list">
+        {
+          future.map((c) => (
+            <li>
+              <span class="pill pill-future">Part {c.data.part}</span>
+              <h3>
+                <Rich text={c.data.title} />
+              </h3>
+              <p>
+                <Rich text={c.data.summary} />
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+      <p><a class="link-arrow" href="/community">Get word when new chapters arrive</a></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lc-hero {
+    --accent: var(--door-lollipop);
+    position: relative;
+    isolation: isolate;
+    padding-block: clamp(3rem, 7vw, 5rem);
+    overflow: hidden;
+  }
+  .lc-hero::before {
+    content: '';
+    position: absolute;
+    inset: -30% -10% auto auto;
+    width: min(70vw, 44rem);
+    aspect-ratio: 1;
+    background: radial-gradient(circle, color-mix(in srgb, var(--door-lollipop) 22%, transparent), transparent 65%);
+    z-index: -1;
+  }
+  .lc-hero-grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  @media (min-width: 56rem) {
+    .lc-hero-grid {
+      grid-template-columns: 1.4fr 1fr;
+    }
+  }
+  .lc-intro {
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+  }
+  .lc-cover {
+    max-width: 24rem;
+    margin-inline: auto;
+    border-radius: 50% 50% var(--radius-lg) var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .lc-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .lc-jump a {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .lc-jump a:hover {
+    border-color: var(--door-lollipop);
+    background: color-mix(in srgb, var(--door-lollipop) 10%, transparent);
+  }
+  .part + .part {
+    margin-top: 3rem;
+  }
+  .part-title {
+    font-size: 1rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--door-lollipop);
+  }
+  .part-sub {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink);
+    margin-top: 0.25rem;
+  }
+  .chapter-list {
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .chapter {
+    flex-direction: row;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+  .chapter-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.35em;
+  }
+  .chapter-num {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--door-lollipop);
+    border: 1.5px solid color-mix(in srgb, var(--door-lollipop) 50%, var(--line));
+  }
+  .gallery {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+  }
+  .gallery figure {
+    margin: 0;
+  }
+  .gallery img {
+    border-radius: var(--radius);
+    aspect-ratio: 1;
+    object-fit: cover;
+    width: 100%;
+  }
+  .gallery figcaption {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin-top: 0.4rem;
+  }
+  .future-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  }
+  .future-list li {
+    padding: 1.5rem;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--radius);
+  }
+  .future-list h3 {
+    margin-top: 0.75rem;
+  }
+  .future-list p {
+    color: var(--ink-soft);
+    margin: 0;
+  }
+</style>

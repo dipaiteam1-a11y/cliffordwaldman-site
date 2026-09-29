@@ -1,0 +1,73 @@
+---
+import { getCollection, getEntries, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SongCard from '../../../components/SongCard.astro';
+import Rich from '../../../components/Rich.astro';
+
+export async function getStaticPaths() {
+  const characters = await getCollection('characters');
+  return characters.map((character) => ({ params: { slug: character.id }, props: { character } }));
+}
+
+interface Props {
+  character: CollectionEntry<'characters'>;
+}
+const { character } = Astro.props;
+const d = character.data;
+const { Content } = await render(character);
+const songs = (await getEntries(d.songs)).filter((s) => !s.data.draft);
+const chapters = (await getCollection('chapters'))
+  .filter((c) => c.data.characters.some((ch) => ch.id === character.id))
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title={d.name} description={d.summary} image={d.artwork?.src} section="/lollipop-cruise">
+  <article class="wrap chapter-page">
+    <a class="back-link" href="/lollipop-cruise#characters">Characters</a>
+    <div class="chapter-body">
+      {
+        d.artwork && (
+          <figure class="chapter-art portrait">
+            <img src={d.artwork.src} alt={d.artwork.alt} width="600" height="600" />
+          </figure>
+        )
+      }
+      <div>
+        <span class="eyebrow">Character</span>
+        <h1><Rich text={d.name} /></h1>
+        <p class="lede"><Rich text={d.role} /></p>
+        <div class="prose"><Content /></div>
+      </div>
+    </div>
+
+    {
+      chapters.length > 0 && (
+        <section class="section-block" aria-labelledby="ch-h">
+          <h2 id="ch-h">Appears in</h2>
+          <ul class="chips">
+            {chapters.map((c) => (
+              <li>
+                <a href={`/lollipop-cruise/chapters/${c.id}`}>
+                  <Rich text={c.data.title} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      songs.length > 0 && (
+        <section class="section-block" aria-labelledby="songs-h">
+          <h2 id="songs-h">Songs</h2>
+          <div class="grid grid-3">
+            {songs.map((s) => (
+              <SongCard song={s} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

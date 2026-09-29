@@ -1,0 +1,108 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import YouTubeLite from '../../components/YouTubeLite.astro';
+import Rich from '../../components/Rich.astro';
+import { formatDateTime, workshopTypeLabel } from '../../lib/format';
+import { registration } from '../../config/site';
+
+export async function getStaticPaths() {
+  const items = await getCollection('workshops', ({ data }) => !data.draft);
+  return items.map((w) => ({ params: { slug: w.id }, props: { w } }));
+}
+
+interface Props {
+  w: CollectionEntry<'workshops'>;
+}
+const { w } = Astro.props;
+const d = w.data;
+const { Content } = await render(w);
+const formatLabel: Record<string, string> = { 'in-person': 'In person', online: 'Online', hybrid: 'In person & online' };
+const regUrl = d.registrationUrl || registration.defaultUrl;
+const external = /^https?:/.test(regUrl);
+const cta = d.status === 'upcoming' ? 'Register' : d.status === 'on-request' ? 'Book this lecture' : d.status === 'ongoing' ? 'Ask about joining' : null;
+---
+
+<BaseLayout title={d.title} description={d.summary} section="/workshops">
+  <article class="wrap chapter-page ws-detail">
+    <a class="back-link" href="/workshops">Workshops & Lectures</a>
+    <div class="ws-grid">
+      <div>
+        <span class="eyebrow">{workshopTypeLabel[d.type]}</span>
+        <h1><Rich text={d.title} /></h1>
+        <p class="lede"><Rich text={d.summary} /></p>
+        {d.recording !== undefined && d.status === 'past' && <div class="ws-video"><YouTubeLite video={d.recording} title={d.title} /></div>}
+        <div class="prose"><Content /></div>
+      </div>
+      <aside class="card ws-facts" aria-labelledby="facts-h">
+        <h2 id="facts-h" class="facts-h">Details</h2>
+        <dl>
+          {d.date && <div><dt>When</dt><dd><time datetime={d.date.toISOString()}>{formatDateTime(d.date)}</time>{d.endDate && <> – {formatDateTime(d.endDate)}</>}</dd></div>}
+          {d.location && <div><dt>Where</dt><dd><Rich text={d.location} /></dd></div>}
+          {d.format && <div><dt>Format</dt><dd>{formatLabel[d.format]}</dd></div>}
+          {d.price && <div><dt>Cost</dt><dd><Rich text={d.price} /></dd></div>}
+          {d.topics.length > 0 && <div><dt>Topics</dt><dd><ul>{d.topics.map((t) => <li><Rich text={t} /></li>)}</ul></dd></div>}
+        </dl>
+        {cta && (
+          <a class="btn" href={regUrl} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>
+            {cta}{external && <span class="visually-hidden"> (opens in a new tab)</span>}
+          </a>
+        )}
+      </aside>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .ws-detail {
+    --accent: var(--door-workshops);
+    --accent-hover: color-mix(in srgb, var(--door-workshops) 80%, var(--ink));
+    --accent-wash: color-mix(in srgb, var(--door-workshops) 13%, var(--bg));
+  }
+  .ws-grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  @media (min-width: 56rem) {
+    .ws-grid {
+      grid-template-columns: 1fr 20rem;
+      gap: 4rem;
+    }
+    .ws-facts {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+    }
+  }
+  .ws-video {
+    margin: 1.5rem 0 2rem;
+  }
+  .facts-h {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .ws-facts dl {
+    margin: 0 0 1.25rem;
+  }
+  .ws-facts dl > div {
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .ws-facts dt {
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+  }
+  .ws-facts dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .ws-facts ul {
+    margin: 0;
+    padding-left: 1.1em;
+    font-weight: 400;
+  }
+</style>

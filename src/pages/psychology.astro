@@ -1,0 +1,134 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/ContactForm.astro';
+
+const page = (await getEntry('pages', 'psychology'))!;
+const { Content, headings } = await render(page);
+const toc = headings.filter((h) => h.depth === 2);
+---
+
+<BaseLayout title={page.data.title} description={page.data.description}>
+  <div class="professional">
+    <header class="pro-hero">
+      <div class="wrap">
+        <span class="eyebrow">{page.data.eyebrow}</span>
+        <h1>Clinical Psychology</h1>
+        <p class="lede">
+          Information about Clifford Waldman's clinical practice, and a simple way for prospective clients to make an
+          initial inquiry.
+        </p>
+        <div class="btn-row">
+          <a class="btn" href="#inquiry">Make an inquiry</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap pro-grid">
+      <nav class="pro-toc" aria-labelledby="pro-toc-h">
+        <p id="pro-toc-h" class="toc-title">Contents</p>
+        <ol>
+          {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+          <li><a href="#inquiry">Inquiries</a></li>
+        </ol>
+      </nav>
+
+      <div>
+        <article class="prose">
+          <Content />
+        </article>
+
+        <section id="inquiry" class="inquiry" aria-labelledby="inquiry-h">
+          <h2 id="inquiry-h">Inquiries from prospective clients</h2>
+          <p>
+            If you're considering working together, send a brief note with your name, how best to reach you, and a
+            general sense of what you're looking for. You'll receive a reply to arrange an initial conversation.
+          </p>
+
+          <div class="notice emergency" role="note" aria-labelledby="emergency-h">
+            <strong id="emergency-h">If you are in crisis or in danger, please don't use this form.</strong>
+            <p>
+              Call your local emergency number (for example <strong>911</strong> in the US or <strong>112</strong> in
+              Europe) or go to the nearest emergency room. In the US you can also call or text <strong>988</strong>, the
+              Suicide &amp; Crisis Lifeline, at any hour. This form is not monitored for emergencies.
+            </p>
+          </div>
+
+          <ContactForm id="inquiry-form" topic="professional" healthNotice />
+        </section>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* A quieter, more clinical register, set apart from the creative pages. */
+  .professional {
+    --accent: var(--door-psychology);
+    --accent-hover: color-mix(in srgb, var(--door-psychology) 80%, var(--ink));
+    --accent-wash: color-mix(in srgb, var(--door-psychology) 12%, var(--bg));
+  }
+  .professional :global(h1),
+  .professional :global(h2),
+  .professional :global(h3) {
+    font-variation-settings: 'SOFT' 0, 'WONK' 0;
+  }
+  .pro-hero {
+    padding-block: clamp(3rem, 7vw, 5rem) 2.5rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 3rem;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--door-psychology) 6%, var(--bg)), var(--bg));
+  }
+  .pro-hero h1 {
+    max-width: none;
+  }
+  .pro-grid {
+    display: grid;
+    gap: 2rem;
+  }
+  @media (min-width: 60rem) {
+    .pro-grid {
+      grid-template-columns: 14rem 1fr;
+      gap: 4rem;
+    }
+    .pro-toc {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+      align-self: start;
+    }
+  }
+  .toc-title {
+    font-size: 0.8rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+  .pro-toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 0.9rem;
+    border-left: 2px solid var(--line);
+    font-size: 0.98rem;
+  }
+  .pro-toc li {
+    padding: 0.2rem 0;
+  }
+  .pro-toc a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .pro-toc a:hover {
+    color: var(--accent);
+  }
+  .inquiry {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--line);
+    max-width: var(--measure);
+  }
+  .emergency {
+    border-left-width: 6px;
+  }
+</style>

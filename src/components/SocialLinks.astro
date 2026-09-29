@@ -1,0 +1,65 @@
+---
+import Icon from './Icon.astro';
+import { socials } from '../config/site';
+
+interface Props {
+  variant?: 'icons' | 'labels';
+}
+const { variant = 'icons' } = Astro.props;
+---
+
+<ul class:list={['socials', `socials-${variant}`]}>
+  {
+    socials.map((s) => (
+      <li>
+        <a href={s.url} rel="me noopener" target="_blank" aria-label={variant === 'icons' ? `${s.label} (opens in a new tab)` : undefined}>
+          <Icon name={s.icon} size={variant === 'icons' ? 20 : 18} />
+          {variant === 'labels' && (
+            <span>
+              {s.label}
+              <span class="visually-hidden"> (opens in a new tab)</span>
+            </span>
+          )}
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .socials {
+    display: flex;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-radius: 999px;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    justify-content: center;
+    transition: color 0.2s, background-color 0.2s;
+  }
+  .socials a:hover {
+    color: var(--accent);
+    background: var(--accent-wash);
+  }
+  .socials-labels {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .socials-labels a {
+    justify-content: flex-start;
+    padding: 0.25rem 0.5rem 0.25rem 0;
+    min-height: 2.25rem;
+  }
+  .socials-labels a:hover {
+    background: transparent;
+  }
+</style>

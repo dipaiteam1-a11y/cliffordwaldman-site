@@ -1,0 +1,157 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import WorkshopCard from '../../components/WorkshopCard.astro';
+import YouTubeLite from '../../components/YouTubeLite.astro';
+import Rich from '../../components/Rich.astro';
+import { formatDate } from '../../lib/format';
+
+const all = await getCollection('workshops', ({ data }) => !data.draft);
+const byDate = (a: (typeof all)[number], b: (typeof all)[number]) => (a.data.date?.getTime() ?? 0) - (b.data.date?.getTime() ?? 0);
+const upcoming = all.filter((w) => w.data.status === 'upcoming').sort(byDate);
+const ongoing = all.filter((w) => w.data.status === 'ongoing' || w.data.type === 'program').filter((w) => w.data.status !== 'upcoming' && w.data.status !== 'past');
+const topics = all.filter((w) => w.data.status === 'on-request' && w.data.type !== 'program');
+const past = all.filter((w) => w.data.status === 'past').sort(byDate).reverse();
+---
+
+<BaseLayout title="Workshops & Lectures" description="Workshops, lectures and educational programs with Clifford Waldman: topics, schedule, registration and recordings.">
+  <div class="ws">
+    <PageHero
+      eyebrow="Workshops & Lectures"
+      title="Learning in the round"
+      lede="Workshops, lectures and educational programs on music, creativity, psychology and spiritual life. Come to one, or bring one to your community."
+    >
+      <div class="btn-row">
+        <a class="btn" href="#schedule">See the schedule</a>
+        <a class="btn btn-ghost" href="/contact?topic=workshop">Book a lecture</a>
+      </div>
+    </PageHero>
+
+    <div class="wrap">
+      <section id="schedule" class="section ws-section" aria-labelledby="sched-h">
+        <div class="section-head">
+          <h2 id="sched-h">Upcoming schedule</h2>
+          <p>Dates, places and how to register.</p>
+        </div>
+        {
+          upcoming.length ? (
+            <ol class="schedule">
+              {upcoming.map((w) => (
+                <li>
+                  <div class="sched-date" aria-hidden="true">
+                    <span class="sched-month">{w.data.date?.toLocaleString('en-US', { month: 'short' })}</span>
+                    <span class="sched-day">{w.data.date?.getDate()}</span>
+                  </div>
+                  <WorkshopCard w={w} />
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p class="empty-state">No sessions are scheduled right now. <a href="/community">Join the list</a> to hear about the next one.</p>
+          )
+        }
+      </section>
+
+      <section class="section ws-section" aria-labelledby="topics-h">
+        <div class="section-head">
+          <h2 id="topics-h">Lecture topics</h2>
+          <p>Available for communities, schools, congregations and conferences.</p>
+        </div>
+        <div class="grid grid-2">{topics.map((w) => <WorkshopCard w={w} />)}</div>
+      </section>
+
+      <section class="section ws-section" aria-labelledby="prog-h">
+        <div class="section-head">
+          <h2 id="prog-h">Educational programs</h2>
+          <p>Longer journeys over several sessions.</p>
+        </div>
+        <div class="grid grid-2">
+          {ongoing.map((w) => <WorkshopCard w={w} />)}
+          <article class="card feature">
+            <span class="eyebrow">Future program</span>
+            <h3><a href="/workshops/witnessing-groups">Artist Creative Development & Witnessing Groups</a></h3>
+            <p>A small group where artists share their work, receive feedback and grow their creative identity together.</p>
+            <span class="link-arrow meta" aria-hidden="true">Register interest</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="section ws-section" aria-labelledby="rec-h">
+        <div class="section-head">
+          <h2 id="rec-h">Recordings</h2>
+          <p>Past lectures you can watch any time.</p>
+        </div>
+        <div class="grid grid-2">
+          {
+            past.map((w) => (
+              <article class="rec">
+                <YouTubeLite video={w.data.recording} title={w.data.title} />
+                <h3>
+                  <a href={`/workshops/${w.id}`}>
+                    <Rich text={w.data.title} />
+                  </a>
+                </h3>
+                {w.data.date && <p class="meta">{formatDate(w.data.date)}</p>}
+              </article>
+            ))
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .ws {
+    --accent: var(--door-workshops);
+    --accent-hover: color-mix(in srgb, var(--door-workshops) 80%, var(--ink));
+    --accent-wash: color-mix(in srgb, var(--door-workshops) 13%, var(--bg));
+  }
+  .ws-section {
+    padding-block: 3rem 0.5rem;
+  }
+  .schedule {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    max-width: 52rem;
+  }
+  .schedule li {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+  .sched-date {
+    display: grid;
+    text-align: center;
+    padding: 0.6rem 0;
+    border-radius: var(--radius);
+    background: var(--accent-wash);
+    line-height: 1.1;
+  }
+  .sched-month {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .sched-day {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+  }
+  .feature {
+    border-style: dashed;
+  }
+  .rec h3 {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+  }
+  .rec h3 a {
+    color: var(--ink);
+  }
+</style>

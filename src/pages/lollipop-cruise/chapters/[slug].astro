@@ -1,0 +1,102 @@
+---
+import { getCollection, getEntries, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SongCard from '../../../components/SongCard.astro';
+import Rich from '../../../components/Rich.astro';
+
+export async function getStaticPaths() {
+  const chapters = (await getCollection('chapters')).sort((a, b) => a.data.order - b.data.order);
+  return chapters.map((chapter, i) => ({
+    params: { slug: chapter.id },
+    props: { chapter, prev: chapters[i - 1], next: chapters[i + 1] },
+  }));
+}
+
+interface Props {
+  chapter: CollectionEntry<'chapters'>;
+  prev?: CollectionEntry<'chapters'>;
+  next?: CollectionEntry<'chapters'>;
+}
+const { chapter, prev, next } = Astro.props;
+const d = chapter.data;
+const { Content } = await render(chapter);
+const songs = (await getEntries(d.songs)).filter((s) => !s.data.draft);
+const characters = await getEntries(d.characters);
+const stories = (await getCollection('stories')).filter((s) => s.data.chapter?.id === chapter.id);
+const statusText: Record<string, string> = { 'in-progress': 'This chapter is still being written.', future: 'This is a future chapter, coming later.' };
+---
+
+<BaseLayout title={d.title} description={d.summary} image={d.artwork?.src} section="/lollipop-cruise">
+  <article class="wrap chapter-page">
+    <a class="back-link" href="/lollipop-cruise#chapters">Lollipop Cruise</a>
+    <header class="chapter-head">
+      <span class="eyebrow">Part {d.part}{d.partTitle && <> · <Rich text={d.partTitle} /></>}</span>
+      <h1><Rich text={d.title} /></h1>
+      <p class="lede"><Rich text={d.summary} /></p>
+      {statusText[d.status] && <p class="notice notice-quiet">{statusText[d.status]}</p>}
+    </header>
+
+    <div class="chapter-body">
+      {
+        d.artwork && (
+          <figure class="chapter-art">
+            <img src={d.artwork.src} alt={d.artwork.alt} width="600" height="600" />
+          </figure>
+        )
+      }
+      <div class="prose"><Content /></div>
+    </div>
+
+    {
+      songs.length > 0 && (
+        <section class="section-block" aria-labelledby="songs-h">
+          <h2 id="songs-h">Songs in this chapter</h2>
+          <div class="grid grid-3">
+            {songs.map((s) => (
+              <SongCard song={s} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      characters.length > 0 && (
+        <section class="section-block" aria-labelledby="chars-h">
+          <h2 id="chars-h">Characters in this chapter</h2>
+          <ul class="chips">
+            {characters.map((c) => (
+              <li>
+                <a href={`/lollipop-cruise/characters/${c.id}`}>
+                  <Rich text={c.data.name} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      stories.length > 0 && (
+        <section class="section-block" aria-labelledby="stories-h">
+          <h2 id="stories-h">Related stories</h2>
+          <ul class="chips">
+            {stories.map((s) => (
+              <li>
+                <a href={`/lollipop-cruise/stories/${s.id}`}>
+                  <Rich text={s.data.title} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <nav class="pager" aria-label="Chapters">
+      {prev ? <a href={`/lollipop-cruise/chapters/${prev.id}`} rel="prev"><span>Previous chapter</span><Rich text={prev.data.title} /></a> : <span />}
+      {next && <a class="pager-next" href={`/lollipop-cruise/chapters/${next.id}`} rel="next"><span>Next chapter</span><Rich text={next.data.title} /></a>}
+    </nav>
+  </article>
+</BaseLayout>

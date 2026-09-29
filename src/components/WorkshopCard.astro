@@ -1,0 +1,38 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Rich from './Rich.astro';
+import { formatDateTime, workshopTypeLabel } from '../lib/format';
+
+interface Props {
+  w: CollectionEntry<'workshops'>;
+}
+const { w } = Astro.props;
+const d = w.data;
+const formatLabel: Record<string, string> = { 'in-person': 'In person', online: 'Online', hybrid: 'In person & online' };
+---
+
+<article class="card ws-card">
+  {
+    d.date && d.status !== 'on-request' && (
+      <p class="ws-date">
+        <time datetime={d.date.toISOString()}>{formatDateTime(d.date)}</time>
+      </p>
+    )
+  }
+  <h3><a href={`/workshops/${w.id}`}><Rich text={d.title} /></a></h3>
+  <p><Rich text={d.summary} /></p>
+  <div class="meta">
+    <span class="pill">{workshopTypeLabel[d.type]}</span>
+    {d.format && <span class="pill">{formatLabel[d.format]}</span>}
+    {d.location && <span><Rich text={d.location} /></span>}
+  </div>
+</article>
+
+<style>
+  .ws-date {
+    font-size: 0.9rem;
+    font-weight: 650;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+</style>

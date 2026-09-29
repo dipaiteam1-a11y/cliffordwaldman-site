@@ -1,0 +1,494 @@
+---
+/**
+ * Synced lyrics player.
+ * - Lyrics are rendered at build time (readable without JavaScript, indexable).
+ * - While audio plays, the current line is highlighted and kept in view.
+ * - Clicking (or pressing Enter on) a line seeks the audio to that moment.
+ * Works with a self-hosted audio file or a SoundCloud track.
+ */
+import { parseLrc, formatTime } from '../lib/lrc';
+import { splitPlaceholders } from '../lib/format';
+
+interface Props {
+  title: string;
+  lyrics: string;
+  audio: { type: 'file'; src: string } | { type: 'soundcloud'; url: string };
+  artwork?: { src: string; alt: string };
+}
+
+const { title, lyrics, audio, artwork } = Astro.props;
+const parsed = parseLrc(lyrics);
+const scSrc =
+  audio.type === 'soundcloud'
+    ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(audio.url)}&color=%239e4320&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false`
+    : '';
+---
+
+<lyrics-player class="lp" data-source={audio.type} data-synced={String(parsed.synced)}>
+  <div class="lp-side">
+    {
+      artwork && (
+        <div class="lp-art">
+          <img src={artwork.src} alt={artwork.alt} width="600" height="600" />
+        </div>
+      )
+    }
+    <div class="lp-player">
+      <p class="lp-now" aria-hidden="true">
+        <span class="lp-now-label">Now playing</span>
+        <span class="lp-now-title">{title}</span>
+      </p>
+      {
+        audio.type === 'file' ? (
+          <audio controls preload="metadata" src={audio.src} data-audio>
+            <a href={audio.src}>Download “{title}”</a>
+          </audio>
+        ) : (
+          <iframe
+            class="lp-sc"
+            data-sc
+            title={`SoundCloud player: ${title}`}
+            src={scSrc}
+            height="120"
+            allow="autoplay"
+            loading="lazy"
+          />
+        )
+      }
+      <p class="lp-error" hidden data-error role="alert">
+        The audio couldn't be loaded. Please try again later.
+      </p>
+      {
+        parsed.synced && (
+          <label class="lp-follow">
+            <input type="checkbox" checked data-follow />
+            Follow along (auto-scroll lyrics)
+          </label>
+        )
+      }
+    </div>
+  </div>
+
+  <section class="lp-lyrics" aria-labelledby="lyrics-heading">
+    <div class="lp-lyrics-head">
+      <h2 id="lyrics-heading">Lyrics</h2>
+      {
+        parsed.synced ? (
+          <p class="lp-hint">Lyrics light up with the music. Select any line to jump to it.</p>
+        ) : (
+          <p class="lp-hint">These lyrics aren't timed yet.</p>
+        )
+      }
+    </div>
+
+    {
+      parsed.synced ? (
+        <ol class="lp-lines" data-lines>
+          {parsed.lines.map((line, i) => (
+            <li class:list={['lp-li', { 'lp-stanza': line.stanzaStart }]}>
+              <button type="button" class:list={['lp-line', { 'lp-instrumental': line.instrumental }]} data-time={line.time} data-index={i}>
+                <span class="lp-time" aria-hidden="true">
+                  {formatTime(line.time ?? 0)}
+                </span>
+                <span class="visually-hidden">Jump to {formatTime(line.time ?? 0)}: </span>
+                <span class="lp-text">
+                  {line.instrumental ? (
+                    <span aria-label="Instrumental">♪</span>
+                  ) : (
+                    splitPlaceholders(line.text).map((p) => (p.placeholder ? <mark class="placeholder">{p.text}</mark> : p.text))
+                  )}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <div class="lp-plain">
+          {parsed.lines.map((line) => (
+            <p class:list={['lp-plain-line', { 'lp-stanza': line.stanzaStart }]}>
+              {splitPlaceholders(line.text).map((p) => (p.placeholder ? <mark class="placeholder">{p.text}</mark> : p.text))}
+            </p>
+          ))}
+        </div>
+      )
+    }
+  </section>
+</lyrics-player>
+
+<script>
+  type Adapter = {
+    seek(seconds: number): void;
+    onTime(cb: (seconds: number) => void): void;
+  };
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /** Self-hosted <audio>: poll currentTime on every animation frame while playing. */
+  function fileAdapter(audio: HTMLAudioElement, onError: () => void): Adapter {
+    let cb: (s: number) => void = () => {};
+    let raf = 0;
+    const tick = () => {
+      cb(audio.currentTime);
+      if (!audio.paused) raf = requestAnimationFrame(tick);
+    };
+    audio.addEventListener('play', () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(tick);
+    });
+    ['pause', 'seeked', 'timeupdate', 'loadedmetadata'].forEach((ev) => audio.addEventListener(ev, () => cb(audio.currentTime)));
+    audio.addEventListener('error', onError);
+    return {
+      seek(s) {
+        audio.currentTime = s;
+        if (audio.paused) audio.play().catch(() => {});
+      },
+      onTime(fn) {
+        cb = fn;
+      },
+    };
+  }
+
+  /** SoundCloud widget: listen to progress events and interpolate between them. */
+  function soundcloudAdapter(iframe: HTMLIFrameElement): Adapter {
+    let cb: (s: number) => void = () => {};
+    let widget: any = null;
+    let last = 0;
+    let stamp = 0;
+    let playing = false;
+    let raf = 0;
+    let pendingSeek: number | null = null;
+
+    const tick = () => {
+      cb(last + (playing ? (performance.now() - stamp) / 1000 : 0));
+      if (playing) raf = requestAnimationFrame(tick);
+    };
+
+    const init = () => {
+      const SC = (window as any).SC;
+      widget = SC.Widget(iframe);
+      const E = SC.Widget.Events;
+      widget.bind(E.READY, () => {
+        if (pendingSeek !== null) {
+          widget.seekTo(pendingSeek * 1000);
+          widget.play();
+          pendingSeek = null;
+        }
+      });
+      widget.bind(E.PLAY_PROGRESS, (e: { currentPosition: number }) => {
+        last = e.currentPosition / 1000;
+        stamp = performance.now();
+      });
+      widget.bind(E.PLAY, () => {
+        playing = true;
+        stamp = performance.now();
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(tick);
+      });
+      const stop = () => {
+        playing = false;
+        widget.getPosition((ms: number) => {
+          last = ms / 1000;
+          cb(last);
+        });
+      };
+      widget.bind(E.PAUSE, stop);
+      widget.bind(E.FINISH, stop);
+      widget.bind(E.SEEK, (e: { currentPosition: number }) => {
+        last = e.currentPosition / 1000;
+        stamp = performance.now();
+        cb(last);
+      });
+    };
+
+    if ((window as any).SC?.Widget) init();
+    else {
+      let s = document.querySelector<HTMLScriptElement>('script[data-sc-api]');
+      if (!s) {
+        s = document.createElement('script');
+        s.src = 'https://w.soundcloud.com/player/api.js';
+        s.async = true;
+        s.dataset.scApi = '';
+        document.head.appendChild(s);
+      }
+      s.addEventListener('load', init);
+    }
+
+    return {
+      seek(sec) {
+        last = sec;
+        stamp = performance.now();
+        if (!widget) {
+          pendingSeek = sec;
+          return;
+        }
+        widget.seekTo(sec * 1000);
+        widget.play();
+      },
+      onTime(fn) {
+        cb = fn;
+      },
+    };
+  }
+
+  class LyricsPlayer extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.synced !== 'true') return;
+      const buttons = Array.from(this.querySelectorAll<HTMLButtonElement>('[data-time]'));
+      const times = buttons.map((b) => Number(b.dataset.time));
+      const follow = this.querySelector<HTMLInputElement>('[data-follow]');
+      const errorEl = this.querySelector<HTMLElement>('[data-error]');
+
+      // Remember the follow-along preference.
+      try {
+        const saved = localStorage.getItem('lyrics-follow');
+        if (follow && saved !== null) follow.checked = saved === 'true';
+      } catch {}
+      follow?.addEventListener('change', () => {
+        try {
+          localStorage.setItem('lyrics-follow', String(follow.checked));
+        } catch {}
+      });
+
+      let adapter: Adapter;
+      const audio = this.querySelector<HTMLAudioElement>('[data-audio]');
+      const sc = this.querySelector<HTMLIFrameElement>('[data-sc]');
+      if (audio) adapter = fileAdapter(audio, () => errorEl && (errorEl.hidden = false));
+      else if (sc) adapter = soundcloudAdapter(sc);
+      else return;
+
+      // Pause auto-scroll briefly while the visitor scrolls on their own.
+      let userScrollUntil = 0;
+      const markUserScroll = () => (userScrollUntil = performance.now() + 4000);
+      window.addEventListener('wheel', markUserScroll, { passive: true });
+      window.addEventListener('touchmove', markUserScroll, { passive: true });
+
+      let current = -1;
+      const LEAD = 0.08; // highlight a hair early so it feels in time
+
+      const indexAt = (t: number) => {
+        let lo = 0;
+        let hi = times.length - 1;
+        let ans = -1;
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1;
+          if (times[mid] <= t + LEAD) {
+            ans = mid;
+            lo = mid + 1;
+          } else hi = mid - 1;
+        }
+        return ans;
+      };
+
+      const setCurrent = (i: number, fromSeek = false) => {
+        if (i === current) return;
+        const prev = buttons[current];
+        prev?.removeAttribute('aria-current');
+        buttons.forEach((b, j) => b.classList.toggle('is-past', j < i));
+        current = i;
+        const el = buttons[i];
+        if (!el) return;
+        el.setAttribute('aria-current', 'true');
+        if (follow?.checked && (fromSeek || performance.now() > userScrollUntil)) {
+          el.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+        }
+      };
+
+      adapter.onTime((t) => setCurrent(indexAt(t)));
+
+      buttons.forEach((b, i) =>
+        b.addEventListener('click', () => {
+          adapter.seek(times[i]);
+          setCurrent(i, true);
+        }),
+      );
+    }
+  }
+
+  if (!customElements.get('lyrics-player')) customElements.define('lyrics-player', LyricsPlayer);
+</script>
+
+<style>
+  .lp {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  @media (min-width: 56rem) {
+    .lp {
+      grid-template-columns: minmax(18rem, 25rem) 1fr;
+    }
+    .lp-side {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+    }
+  }
+
+  .lp-art {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: var(--bg-sunk);
+    margin-bottom: 1.25rem;
+    aspect-ratio: 1;
+  }
+  .lp-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @media (max-width: 55.99rem) {
+    .lp-art {
+      max-width: 14rem;
+    }
+    /* Keep the audio controls on screen while reading lyrics on phones. */
+    .lp-player {
+      position: sticky;
+      top: calc(var(--header-h) + 0.5rem);
+      z-index: 5;
+    }
+  }
+
+  .lp-player {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+  }
+  .lp-now {
+    display: grid;
+    margin: 0 0 0.6rem;
+    line-height: 1.25;
+  }
+  .lp-now-label {
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .lp-now-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+  .lp-player audio {
+    width: 100%;
+  }
+  .lp-sc {
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+  }
+  .lp-error {
+    margin: 0.5rem 0 0;
+    color: var(--notice-line);
+    font-size: 0.95rem;
+  }
+  .lp-follow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .lp-follow input {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--accent);
+  }
+
+  .lp-lyrics-head h2 {
+    margin-bottom: 0.2em;
+  }
+  .lp-hint {
+    color: var(--ink-faint);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .lp-li.lp-stanza {
+    margin-top: 1.4rem;
+  }
+  .lp-line {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    align-items: baseline;
+    width: 100%;
+    padding: 0.3rem 0.75rem 0.3rem 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 50, 'opsz' 24;
+    font-size: clamp(1.2rem, 2.2vw, 1.45rem);
+    line-height: 1.45;
+    color: var(--ink-soft);
+    transition: color 0.25s, background-color 0.25s, transform 0.25s;
+    transform-origin: left center;
+  }
+  .lp-line:hover {
+    background: var(--bg-sunk);
+    color: var(--ink);
+  }
+  .lp-line:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .lp-time {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-faint);
+    text-align: right;
+    padding-right: 0.9rem;
+    opacity: 0.55;
+  }
+  .lp-line:hover .lp-time,
+  .lp-line:focus-visible .lp-time,
+  .lp-line[aria-current='true'] .lp-time {
+    opacity: 1;
+  }
+  .lp-line.is-past {
+    color: var(--ink-faint);
+  }
+  .lp-line[aria-current='true'] {
+    color: var(--ink);
+    background: var(--accent-wash);
+    font-weight: 560;
+    box-shadow: inset 4px 0 0 var(--accent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .lp-line[aria-current='true'] {
+      transform: scale(1.02);
+    }
+  }
+  /* Placeholders inside lyrics stay visible without hiding the highlight */
+  .lp-line :global(mark.placeholder) {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border-bottom: 2px dashed var(--placeholder-line);
+  }
+  .lp-instrumental .lp-text {
+    color: var(--ink-faint);
+    letter-spacing: 0.3em;
+  }
+
+  .lp-plain-line {
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 2vw, 1.35rem);
+    margin: 0 0 0.35rem;
+  }
+  .lp-plain-line.lp-stanza {
+    margin-top: 1.4rem;
+  }
+</style>

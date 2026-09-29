@@ -1,0 +1,68 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SignupForm from '../../components/SignupForm.astro';
+
+const page = (await getEntry('pages', 'witnessing-groups'))!;
+const { Content } = await render(page);
+---
+
+<BaseLayout title="Witnessing Groups" description={page.data.description} section="/workshops">
+  <div class="wg">
+    <PageHero
+      eyebrow={page.data.eyebrow}
+      title="Artist Creative Development & Witnessing Groups"
+      lede="Bring your work into a circle of artists. Share it, be truly seen, and receive feedback that helps both the art and the artist grow."
+    >
+      <div class="btn-row"><a class="btn" href="#interest">Register interest</a></div>
+    </PageHero>
+
+    <div class="wrap wg-grid">
+      <article class="prose">
+        <Content />
+      </article>
+
+      <aside id="interest" class="card wg-form" aria-labelledby="interest-h">
+        <span class="eyebrow">Not open yet</span>
+        <h2 id="interest-h">Register your interest</h2>
+        <p>Be the first to hear when the first group forms. No commitment.</p>
+        <SignupForm name="witnessing-interest" submitLabel="Keep me posted">
+          <div class="field">
+            <label for="wi-art">Your art form</label>
+            <input id="wi-art" name="art-form" type="text" placeholder="e.g. songwriting, painting, poetry" />
+          </div>
+          <div class="field">
+            <label for="wi-note">Anything you'd like to share? <span class="hint">(optional)</span></label>
+            <textarea id="wi-note" name="note" rows="4"></textarea>
+          </div>
+        </SignupForm>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .wg {
+    --accent: var(--door-workshops);
+    --accent-hover: color-mix(in srgb, var(--door-workshops) 80%, var(--ink));
+    --accent-wash: color-mix(in srgb, var(--door-workshops) 13%, var(--bg));
+  }
+  .wg-grid {
+    display: grid;
+    gap: 3rem;
+    align-items: start;
+  }
+  @media (min-width: 60rem) {
+    .wg-grid {
+      grid-template-columns: 1fr 24rem;
+    }
+    .wg-form {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+    }
+  }
+  .wg-form h2 {
+    font-size: 1.6rem;
+  }
+</style>

@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import PostList from '../../components/PostList.astro';
+import TopicNav from '../../components/TopicNav.astro';
+
+const posts = (await getCollection('spirituality', ({ data }) => !data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout title="Spirituality & Torah" description="Reflections, Torah thoughts, faith, spiritual growth and human development, by Clifford Waldman.">
+  <Fragment slot="head">
+    <link rel="alternate" type="application/rss+xml" title="Spirituality & Torah · The Gathering Place" href="/spirituality/rss.xml" />
+  </Fragment>
+  <div class="spirit">
+    <PageHero
+      eyebrow="Spirituality & Torah"
+      title="Reflections along the way"
+      lede="Torah thoughts, faith and spiritual growth, and the places where the divine and the psychological meet."
+    >
+      <p class="rss"><a href="/spirituality/rss.xml">Subscribe via RSS</a></p>
+    </PageHero>
+    <div class="wrap">
+      <TopicNav />
+      <PostList posts={posts} />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .spirit {
+    --accent: var(--door-spirit);
+    --accent-wash: color-mix(in srgb, var(--door-spirit) 14%, var(--bg));
+  }
+  .rss {
+    font-size: 0.95rem;
+  }
+</style>
