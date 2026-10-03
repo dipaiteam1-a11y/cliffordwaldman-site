@@ -1,0 +1,59 @@
+---
+/**
+ * Email sign-up (mailing list / interest list). Each list has its own form name,
+ * so submissions are sorted automatically in Netlify (or tagged in Formspree).
+ */
+import { forms } from '../config/site';
+
+interface Props {
+  /** Unique form name, e.g. "gathering-list" or "witnessing-interest". */
+  name: string;
+  submitLabel?: string;
+  /** Ask for the visitor's name too. */
+  askName?: boolean;
+  id?: string;
+}
+const { name, submitLabel = 'Sign me up', askName = true, id = name } = Astro.props;
+const endpoint = forms.signupEndpoint;
+const netlify = !endpoint;
+---
+
+<form
+  class="form signup"
+  name={name}
+  method="POST"
+  action={netlify ? forms.thanksPage : endpoint}
+  data-netlify={netlify ? 'true' : undefined}
+  netlify-honeypot={netlify ? 'bot-field' : undefined}
+>
+  {netlify && <input type="hidden" name="form-name" value={name} />}
+  <input type="hidden" name="list" value={name} />
+  <p class="honeypot">
+    <label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+  </p>
+  {
+    askName && (
+      <div class="field">
+        <label for={`${id}-name`}>First name</label>
+        <input id={`${id}-name`} name="name" type="text" autocomplete="given-name" />
+      </div>
+    )
+  }
+  <div class="field">
+    <label for={`${id}-email`}>Email</label>
+    <input id={`${id}-email`} name="email" type="email" autocomplete="email" required />
+  </div>
+  <slot />
+  <p class="signup-note">No spam, ever. Just an occasional letter when something new opens up. Unsubscribe anytime.</p>
+  <div>
+    <button class="btn" type="submit">{submitLabel}</button>
+  </div>
+</form>
+
+<style>
+  .signup-note {
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+</style>

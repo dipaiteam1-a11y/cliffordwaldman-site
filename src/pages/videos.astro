@@ -1,0 +1,99 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import YouTubeLite from '../components/YouTubeLite.astro';
+import Rich from '../components/Rich.astro';
+import { videoCategoryLabel, formatDate } from '../lib/format';
+import { socials } from '../config/site';
+
+const videos = (await getCollection('videos')).sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0));
+const categories = ['music-video', 'interview', 'lecture', 'visual-story'] as const;
+const songTitles = new Map<string, string>();
+for (const v of videos) {
+  if (v.data.song) {
+    const s = await getEntry(v.data.song);
+    if (s) songTitles.set(v.id, s.data.title);
+  }
+}
+const youtube = socials.find((s) => s.icon === 'youtube');
+---
+
+<BaseLayout title="Videos & Media" description="Music videos, interviews, lectures and visual storytelling from Clifford Waldman." section="/music">
+  <PageHero
+    eyebrow="Videos & Media"
+    title="Watch and listen"
+    lede="Music videos, interviews, lectures and visual stories. Videos load only when you press play, so the page stays light."
+  >
+    {youtube && <div class="btn-row"><a class="btn btn-ghost" href={youtube.url} rel="noopener" target="_blank">Visit the YouTube channel<span class="visually-hidden"> (opens in a new tab)</span></a></div>}
+  </PageHero>
+
+  <div class="wrap">
+    <nav class="cat-jump" aria-label="Video categories">
+      {categories.map((c) => videos.some((v) => v.data.category === c) && <a href={`#${c}`}>{videoCategoryLabel[c]}</a>)}
+    </nav>
+    {
+      categories.map((c) => {
+        const list = videos.filter((v) => v.data.category === c);
+        if (!list.length) return null;
+        return (
+          <section class="section vid-section" id={c} aria-labelledby={`${c}-h`}>
+            <h2 id={`${c}-h`}>{videoCategoryLabel[c]}</h2>
+            <div class="grid grid-2">
+              {list.map((v) => (
+                <article class="video">
+                  <YouTubeLite video={v.data.youtube} title={v.data.title} />
+                  <h3>
+                    <Rich text={v.data.title} />
+                  </h3>
+                  <p>
+                    <Rich text={v.data.description} />
+                  </p>
+                  <div class="meta">
+                    {v.data.date && <time datetime={v.data.date.toISOString()}>{formatDate(v.data.date)}</time>}
+                    {v.data.song && (
+                      <a href={`/music/${v.data.song.id}`}>
+                        Lyrics: <Rich text={songTitles.get(v.id)} />
+                      </a>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        );
+      })
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .cat-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .cat-jump a {
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .cat-jump a:hover {
+    background: var(--accent-wash);
+  }
+  .vid-section {
+    padding-block: 3rem 0.5rem;
+  }
+  .video h3 {
+    margin-top: 1rem;
+    font-size: 1.3rem;
+  }
+  .video p {
+    color: var(--ink-soft);
+    margin-bottom: 0.5rem;
+  }
+</style>

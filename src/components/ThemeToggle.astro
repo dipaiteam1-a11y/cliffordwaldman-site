@@ -1,0 +1,57 @@
+---
+import Icon from './Icon.astro';
+---
+
+<button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
+  <span class="icon-sun"><Icon name="sun" /></span>
+  <span class="icon-moon"><Icon name="moon" /></span>
+</button>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const current = () => (root.dataset.theme as 'light' | 'dark' | undefined) ?? (media.matches ? 'dark' : 'light');
+  const sync = () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    btn?.setAttribute('aria-label', `Switch to ${next} theme`);
+    btn?.setAttribute('data-current', current());
+  };
+  btn?.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {}
+    sync();
+  });
+  media.addEventListener('change', sync);
+  sync();
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--line-strong);
+  }
+  .icon-moon {
+    display: none;
+  }
+  .theme-toggle[data-current='light'] .icon-sun {
+    display: none;
+  }
+  .theme-toggle[data-current='light'] .icon-moon {
+    display: block;
+  }
+</style>

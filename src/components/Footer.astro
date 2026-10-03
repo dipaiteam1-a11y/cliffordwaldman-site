@@ -1,0 +1,108 @@
+---
+import { nav, site } from '../config/site';
+import SocialLinks from './SocialLinks.astro';
+
+const year = new Date().getFullYear();
+const flat = nav.filter((n) => n.href !== '/').flatMap((n) => (n.children ? n.children : [n]));
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-about">
+      <p class="footer-name">{site.name}</p>
+      <p>
+        The home of {site.owner}'s music, writing, psychology, spirituality and community.
+        Wherever you found him (X, SoundCloud or YouTube), this is where it all comes together.
+      </p>
+      <a class="btn btn-ghost" href="/community">Join the Gathering Place</a>
+    </div>
+    <nav aria-label="Footer">
+      <p class="footer-head">Explore</p>
+      <ul class="footer-links">
+        {flat.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <div>
+      <p class="footer-head">Doors in</p>
+      <SocialLinks variant="labels" />
+    </div>
+  </div>
+  <div class="wrap footer-base">
+    <p>© {year} {site.owner}. All music, lyrics and writing are the work of {site.owner}.</p>
+    <p><a href="/contact">Contact</a> · <a href="/sitemap-index.xml">Sitemap</a></p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 4rem;
+    background: var(--bg-sunk);
+    border-top: 1px solid var(--line);
+    padding-top: 3.5rem;
+    font-size: 1rem;
+  }
+  .footer-grid {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 48rem) {
+    .footer-grid {
+      grid-template-columns: 1.4fr 1.2fr 0.8fr;
+    }
+  }
+  .footer-name {
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .footer-about p {
+    color: var(--ink-soft);
+    max-width: 30rem;
+  }
+  .footer-head {
+    font-size: 0.8rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+  }
+  .footer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 2;
+    column-gap: 1.5rem;
+  }
+  .footer-links li {
+    break-inside: avoid;
+    padding: 0.2rem 0;
+  }
+  .footer-links a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .footer-links a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  .footer-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    margin-top: 3rem;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--line);
+    color: var(--ink-faint);
+    font-size: 0.9rem;
+  }
+  .footer-base p {
+    margin: 0;
+  }
+  .footer-base a {
+    color: inherit;
+  }
+</style>

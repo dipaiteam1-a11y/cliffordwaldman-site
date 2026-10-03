@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../config/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  /** Used to mark the current nav item, e.g. "/music". Defaults to the URL. */
+  section?: string;
+  noindex?: boolean;
+}
+
+const { title, description = site.description, image = '/images/og-default.png', section, noindex = false } = Astro.props;
+const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.owner}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
+// Social networks don't display SVG previews, so fall back to the default PNG.
+const ogImage = new URL(image.endsWith('.svg') ? '/images/og-default.png' : image, Astro.site ?? site.url).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#f7f0e3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1512" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <script is:inline>
+      // Apply the saved theme before first paint (prevents a flash).
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header section={section} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

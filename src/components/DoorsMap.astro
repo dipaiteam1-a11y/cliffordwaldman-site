@@ -1,0 +1,309 @@
+---
+/**
+ * The home page's centrepiece: The Gathering Place as a hearth in the middle,
+ * with every part of Clifford's world arranged around it as a door.
+ * On small screens the hearth sits on top and the doors follow in a grid.
+ */
+type Door = { key: string; label: string; href: string; blurb: string; color: string; icon: string };
+
+const doors: Door[] = [
+  { key: 'story', label: 'My Story', href: '/my-story', blurb: 'The road that led here', color: 'var(--door-story)', icon: 'path' },
+  { key: 'music', label: 'Music & Lyrics', href: '/music', blurb: 'Songs, with the words beside them', color: 'var(--door-music)', icon: 'note' },
+  { key: 'lollipop', label: 'Lollipop Cruise', href: '/lollipop-cruise', blurb: 'A creative universe in chapters', color: 'var(--door-lollipop)', icon: 'lollipop' },
+  { key: 'writing', label: 'Writing', href: '/writing', blurb: 'Essays, books, the Book of Songs', color: 'var(--door-writing)', icon: 'quill' },
+  { key: 'psychology', label: 'Psychology', href: '/psychology', blurb: 'Clinical work and inquiries', color: 'var(--door-psychology)', icon: 'mind' },
+  { key: 'spirit', label: 'Spirituality', href: '/spirituality', blurb: 'Torah thoughts and reflections', color: 'var(--door-spirit)', icon: 'flame' },
+  { key: 'workshops', label: 'Workshops', href: '/workshops', blurb: 'Lectures, programs, groups', color: 'var(--door-workshops)', icon: 'circle' },
+  { key: 'videos', label: 'Videos', href: '/videos', blurb: 'Music videos, talks, stories', color: 'var(--door-videos)', icon: 'frame' },
+];
+
+// Place doors on an ellipse around the hearth (percent of the stage).
+const RX = 40;
+const RY = 38.5;
+const placed = doors.map((d, i) => {
+  const angle = -Math.PI / 2 + (i * 2 * Math.PI) / doors.length;
+  return { ...d, x: 50 + RX * Math.cos(angle), y: 50 + RY * Math.sin(angle) };
+});
+---
+
+<div class="stage">
+  <svg class="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    {placed.map((d) => <line x1="50" y1="50" x2={d.x} y2={d.y} style={`stroke:${d.color}`} vector-effect="non-scaling-stroke" />)}
+  </svg>
+
+  <div class="hearth">
+    <div class="hearth-glow" aria-hidden="true"></div>
+    <div class="hearth-body">
+      <span class="hearth-eyebrow">At the centre</span>
+      <h2 class="hearth-title">The Gathering Place</h2>
+      <p>A home where music, ideas, faith and people meet, and where the conversation keeps going.</p>
+      <a class="btn" href="/community">Step inside</a>
+    </div>
+  </div>
+
+  <nav class="doors-nav" aria-label="Doors into the site">
+    <ul class="doors">
+      {
+        placed.map((d) => (
+          <li class="door" style={`--x:${d.x.toFixed(2)}%;--y:${d.y.toFixed(2)}%;--c:${d.color}`}>
+            <a href={d.href}>
+              <span class="door-arch" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  {d.icon === 'path' && <path d="M6 27c5-1 6-5 10-7s6-5 5-9-4-5-2-7" />}
+                  {d.icon === 'note' && (
+                    <g>
+                      <path d="M12 23V8l13-3v15" />
+                      <circle cx="9" cy="23" r="3" />
+                      <circle cx="22" cy="20" r="3" />
+                    </g>
+                  )}
+                  {d.icon === 'lollipop' && (
+                    <g>
+                      <circle cx="16" cy="12" r="7" />
+                      <path d="M16 12a3 3 0 1 1 3-3M16 12a5 5 0 1 0 5 1" />
+                      <path d="M16 19v10" />
+                    </g>
+                  )}
+                  {d.icon === 'quill' && (
+                    <g>
+                      <path d="M26 5C16 7 10 14 8 25" />
+                      <path d="M26 5c-1 8-6 13-14 14M6 28l3-4" />
+                    </g>
+                  )}
+                  {d.icon === 'mind' && (
+                    <g>
+                      <circle cx="12.5" cy="16" r="7" />
+                      <circle cx="19.5" cy="16" r="7" />
+                    </g>
+                  )}
+                  {d.icon === 'flame' && (
+                    <g>
+                      <path d="M16 4c1 5 7 8 7 14a7 7 0 0 1-14 0c0-4 3-5 3-9 2 1 3 3 3 5 1-2 1-6 1-10z" />
+                      <path d="M11 29h10" />
+                    </g>
+                  )}
+                  {d.icon === 'circle' && (
+                    <g>
+                      <circle cx="16" cy="8" r="3" />
+                      <circle cx="7" cy="21" r="3" />
+                      <circle cx="25" cy="21" r="3" />
+                      <path d="M11 11.5 9 17M21 11.5l2 5.5M11 24h10" />
+                    </g>
+                  )}
+                  {d.icon === 'frame' && (
+                    <g>
+                      <rect x="4" y="8" width="24" height="16" rx="3" />
+                      <path d="M14 12.5v7l6-3.5z" fill="currentColor" stroke="none" />
+                    </g>
+                  )}
+                </svg>
+              </span>
+              <span class="door-label">{d.label}</span>
+              <span class="door-blurb">{d.blurb}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>
+
+<style>
+  .stage {
+    position: relative;
+    display: grid;
+    gap: 1.5rem;
+  }
+  .paths {
+    display: none;
+  }
+
+  /* ---- Hearth ---- */
+  .hearth {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border-radius: var(--radius-lg);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .hearth-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--hearth-1) 70%, transparent) 0%, transparent 42%),
+      radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--hearth-2) 45%, transparent) 0%, transparent 60%);
+    opacity: 0.55;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hearth-glow {
+      animation: ember 6s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes ember {
+    0% {
+      opacity: 0.45;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.62;
+    }
+    100% {
+      opacity: 0.5;
+      transform: scale(1.05);
+    }
+  }
+  .hearth-body {
+    max-width: 21rem;
+  }
+  .hearth-eyebrow {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .hearth-title {
+    font-size: clamp(1.9rem, 3.4vw, 2.5rem);
+    font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 96;
+    margin-bottom: 0.4rem;
+  }
+  .hearth p {
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+
+  /* ---- Doors (mobile grid) ---- */
+  .doors {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+  }
+  @media (min-width: 40rem) {
+    .doors {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .door a {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 0.3rem;
+    height: 100%;
+    padding: 1.4rem 0.8rem 1.1rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--bg-raised);
+    border: 1.5px solid color-mix(in srgb, var(--c) 35%, var(--line));
+    /* the arched doorway */
+    border-radius: 50% 50% 14px 14px / 5.5rem 5.5rem 14px 14px;
+    box-shadow: var(--shadow);
+    transition: transform 0.25s, border-color 0.25s, background-color 0.25s;
+  }
+  .door a:hover,
+  .door a:focus-visible {
+    border-color: var(--c);
+    background: color-mix(in srgb, var(--c) 9%, var(--bg-raised));
+    color: var(--ink);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .door a:hover {
+      transform: translateY(-4px);
+    }
+  }
+  .door a:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .door-arch {
+    display: grid;
+    place-items: center;
+    width: 3.3rem;
+    height: 3.3rem;
+    border-radius: 999px;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+    margin-bottom: 0.35rem;
+  }
+  .door-label {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 520;
+    line-height: 1.15;
+  }
+  .door-blurb {
+    font-size: 0.88rem;
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+
+  /* ---- Doors around the hearth (large screens) ---- */
+  @media (min-width: 64rem) {
+    .stage {
+      display: block;
+      height: 49rem;
+    }
+    .paths {
+      display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .paths line {
+      stroke-width: 1.5;
+      stroke-dasharray: 2 7;
+      stroke-linecap: round;
+      opacity: 0.55;
+    }
+    .hearth {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 22rem;
+      height: 22rem;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      padding: 2.5rem;
+      border-width: 2px;
+      border-color: color-mix(in srgb, var(--hearth-2) 40%, var(--line));
+      box-shadow:
+        0 0 0 10px color-mix(in srgb, var(--hearth-1) 14%, transparent),
+        0 0 0 22px color-mix(in srgb, var(--hearth-1) 7%, transparent),
+        var(--shadow);
+    }
+    .doors-nav {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .doors {
+      display: block;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .door {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: 10.75rem;
+      height: 11.25rem;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+    }
+  }
+</style>

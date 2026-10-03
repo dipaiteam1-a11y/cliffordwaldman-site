@@ -1,0 +1,186 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LyricsPlayer from '../../components/LyricsPlayer.astro';
+import YouTubeLite from '../../components/YouTubeLite.astro';
+import Rich from '../../components/Rich.astro';
+import { songCollectionLabel } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const songs = (await getCollection('songs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+  return songs.map((song, i) => ({
+    params: { slug: song.id },
+    props: { song, prev: songs[i - 1], next: songs[i + 1] },
+  }));
+}
+
+interface Props {
+  song: CollectionEntry<'songs'>;
+  prev?: CollectionEntry<'songs'>;
+  next?: CollectionEntry<'songs'>;
+}
+const { song, prev, next } = Astro.props;
+const { Content } = await render(song);
+const d = song.data;
+
+// Back-links: chapters, characters and stories that mention this song.
+const chapters = (await getCollection('chapters')).filter((c) => c.data.songs.some((s) => s.id === song.id));
+const characters = (await getCollection('characters')).filter((c) => c.data.songs.some((s) => s.id === song.id));
+const stories = (await getCollection('stories')).filter((s) => s.data.song?.id === song.id);
+const hasRelated = chapters.length + characters.length + stories.length > 0;
+const backHref = d.collection === 'lollipop-cruise' ? '/lollipop-cruise' : '/music';
+const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All songs';
+---
+
+<BaseLayout title={d.title} description={d.summary.replace(/\[[^\]]*\]\s*/g, '') || `${d.title}, with synced lyrics.`} image={d.artwork?.src} section="/music">
+  <div class="wrap song-wrap">
+    <a class="back-link" href={backHref}>{backLabel}</a>
+    <header class="song-head">
+      <span class="eyebrow">{songCollectionLabel[d.collection]}</span>
+      <h1><Rich text={d.title} /></h1>
+      <p class="lede"><Rich text={d.summary} /></p>
+    </header>
+
+    <LyricsPlayer title={d.title} lyrics={d.lyrics} audio={d.audio} artwork={d.artwork} />
+
+    <div class="song-extra">
+      <div class="prose">
+        <Content />
+      </div>
+
+      <aside class="song-aside">
+        {
+          d.credits.length > 0 && (
+            <section aria-labelledby="credits-h">
+              <h2 id="credits-h" class="aside-h">Credits</h2>
+              <dl class="credits">
+                {d.credits.map((c) => (
+                  <div>
+                    <dt>{c.role}</dt>
+                    <dd>{c.name}</dd>
+                  </div>
+                ))}
+                {d.year && (
+                  <div>
+                    <dt>Year</dt>
+                    <dd>
+                      <Rich text={String(d.year)} />
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </section>
+          )
+        }
+        {
+          d.audio.type === 'soundcloud' && (
+            <p>
+              <a href={d.audio.url} rel="noopener" target="_blank">
+                Open on SoundCloud<span class="visually-hidden"> (opens in a new tab)</span>
+              </a>
+            </p>
+          )
+        }
+      </aside>
+    </div>
+
+    {
+      d.youtube && (
+        <section class="song-video" aria-labelledby="video-h">
+          <h2 id="video-h">Watch</h2>
+          <YouTubeLite video={d.youtube} title={d.title} />
+        </section>
+      )
+    }
+
+    {
+      hasRelated && (
+        <section class="related" aria-labelledby="related-h">
+          <h2 id="related-h">In the Lollipop Cruise</h2>
+          <ul class="related-list">
+            {chapters.map((c) => (
+              <li>
+                <span class="pill">Chapter</span> <a href={`/lollipop-cruise/chapters/${c.id}`}><Rich text={c.data.title} /></a>
+              </li>
+            ))}
+            {characters.map((c) => (
+              <li>
+                <span class="pill">Character</span> <a href={`/lollipop-cruise/characters/${c.id}`}><Rich text={c.data.name} /></a>
+              </li>
+            ))}
+            {stories.map((s) => (
+              <li>
+                <span class="pill">Story</span> <a href={`/lollipop-cruise/stories/${s.id}`}><Rich text={s.data.title} /></a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <nav class="pager" aria-label="More songs">
+      {prev ? <a href={`/music/${prev.id}`} rel="prev"><span>Previous song</span><Rich text={prev.data.title} /></a> : <span />}
+      {next && <a class="pager-next" href={`/music/${next.id}`} rel="next"><span>Next song</span><Rich text={next.data.title} /></a>}
+    </nav>
+  </div>
+</BaseLayout>
+
+<style>
+  .song-wrap {
+    padding-top: 2.5rem;
+  }
+  .song-head {
+    margin-bottom: 2.5rem;
+  }
+  .song-head h1 {
+    margin-bottom: 0.25em;
+  }
+  .song-extra {
+    display: grid;
+    gap: 2rem;
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--line);
+  }
+  @media (min-width: 56rem) {
+    .song-extra {
+      grid-template-columns: 1fr 18rem;
+      gap: 4rem;
+    }
+  }
+  .aside-h {
+    font-size: 1.1rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .credits {
+    margin: 0;
+  }
+  .credits div {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .credits dt {
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+  }
+  .credits dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .song-video,
+  .related {
+    margin-top: 3.5rem;
+    max-width: 52rem;
+  }
+  .related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+</style>

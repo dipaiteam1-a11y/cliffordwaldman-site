@@ -1,0 +1,49 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Rich from './Rich.astro';
+import { songCollectionLabel } from '../lib/format';
+import { parseLrc } from '../lib/lrc';
+
+interface Props {
+  song: CollectionEntry<'songs'>;
+  headingLevel?: 'h2' | 'h3';
+}
+const { song, headingLevel = 'h3' } = Astro.props;
+const { title, summary, artwork, collection } = song.data;
+const synced = parseLrc(song.data.lyrics).synced;
+const H = headingLevel;
+---
+
+<article class="card song-card">
+  <div class="card-art song-art">
+    {
+      artwork ? (
+        <img src={artwork.src} alt="" loading="lazy" width="600" height="600" />
+      ) : (
+        <span class="song-art-fallback" aria-hidden="true">♪</span>
+      )
+    }
+  </div>
+  <H class="song-title"><a href={`/music/${song.id}`}><Rich text={title} /></a></H>
+  <p><Rich text={summary} /></p>
+  <div class="meta">
+    <span class="pill">{songCollectionLabel[collection]}</span>
+    {synced && <span class="pill pill-accent">Synced lyrics</span>}
+  </div>
+</article>
+
+<style>
+  .song-art {
+    aspect-ratio: 1;
+  }
+  .song-art-fallback {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    font-size: 3rem;
+    color: var(--ink-faint);
+  }
+  .song-title {
+    font-size: 1.35rem;
+  }
+</style>

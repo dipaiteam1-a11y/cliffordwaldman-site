@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactForm from '../components/ContactForm.astro';
+import SocialLinks from '../components/SocialLinks.astro';
+import { site } from '../config/site';
+---
+
+<BaseLayout title="Contact" description="Get in touch with Clifford Waldman: general notes, professional inquiries, workshops, collaboration, media and speaking.">
+  <PageHero eyebrow="Contact" title="Pull up a chair" lede="Whether it's about a song, a workshop, a collaboration or a speaking invitation, I'd be glad to hear from you." />
+  <div class="wrap contact-grid">
+    <ContactForm />
+    <aside class="contact-aside">
+      <div class="card">
+        <h2 class="aside-h">Good to know</h2>
+        <ul>
+          <li>Choose a topic so your message reaches the right place.</li>
+          <li><mark class="placeholder">[TODO: typical reply time, e.g. "Replies usually within a week."]</mark></li>
+          <li>
+            For psychology inquiries, please see the <a href="/psychology#inquiry">Clinical Psychology</a> page, and don't
+            include personal health details in any form.
+          </li>
+          <li>If you're in crisis, call your local emergency number (such as 911 or 112) rather than writing here.</li>
+        </ul>
+        {site.email && <p>Or email <a href={`mailto:${site.email}`}>{site.email}</a></p>}
+      </div>
+      <div class="card">
+        <h2 class="aside-h">Elsewhere</h2>
+        <SocialLinks variant="labels" />
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .contact-grid {
+    display: grid;
+    gap: 3rem;
+    align-items: start;
+  }
+  @media (min-width: 56rem) {
+    .contact-grid {
+      grid-template-columns: 1.3fr 1fr;
+    }
+  }
+  .contact-aside {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .aside-h {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .contact-aside ul {
+    margin: 0;
+    padding-left: 1.1em;
+    color: var(--ink-soft);
+    font-size: 1rem;
+  }
+  .contact-aside li + li {
+    margin-top: 0.5rem;
+  }
+</style>

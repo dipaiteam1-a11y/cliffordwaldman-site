@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9b36a"/><stop offset="1" stop-color="#4f5d2f"/></linearGradient></defs>
+<rect width="600" height="600" fill="url(#g)"/>
+<path d="M180 520 V300 a120 120 0 0 1 240 0 V520z" fill="#f1e8c8" opacity=".85"/><circle cx="300" cy="400" r="34" fill="#c9b36a"/>
+<rect x="24" y="24" width="552" height="552" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2" stroke-dasharray="8 8"/>
+<text x="300" y="80" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#fff" fill-opacity=".9">Sample Song Three</text>
+<text x="300" y="112" text-anchor="middle" font-family="sans-serif" font-size="16" letter-spacing="3" fill="#fff" fill-opacity=".75">PLACEHOLDER ARTWORK</text>
+</svg>

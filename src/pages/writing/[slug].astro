@@ -1,0 +1,49 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SongCard from '../../components/SongCard.astro';
+import Rich from '../../components/Rich.astro';
+import { formatDate, writingKindLabel } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const items = await getCollection('writing', ({ data }) => !data.draft);
+  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
+}
+
+interface Props {
+  item: CollectionEntry<'writing'>;
+}
+const { item } = Astro.props;
+const d = item.data;
+const { Content } = await render(item);
+const songs =
+  d.kind === 'book-of-songs'
+    ? (await getCollection('songs', ({ data }) => !data.draft && data.collection === 'book-of-songs')).sort((a, b) => a.data.order - b.data.order)
+    : [];
+const statusLabel: Record<string, string> = { published: '', 'in-development': 'In development', planned: 'Planned' };
+---
+
+<BaseLayout title={d.title} description={d.summary} section="/writing">
+  <article class="wrap wrap-narrow chapter-page">
+    <a class="back-link" href="/writing">Writing</a>
+    <span class="eyebrow">{writingKindLabel[d.kind]}{statusLabel[d.status] && ` · ${statusLabel[d.status]}`}</span>
+    <h1><Rich text={d.title} /></h1>
+    <p class="lede"><Rich text={d.summary} /></p>
+    {d.date && <p class="meta"><time datetime={d.date.toISOString()}>{formatDate(d.date)}</time></p>}
+    <div class="divider-ornament" aria-hidden="true"></div>
+    <div class="prose"><Content /></div>
+  </article>
+
+  {
+    songs.length > 0 && (
+      <section class="wrap section-block" aria-labelledby="bos-songs">
+        <h2 id="bos-songs">Songs in the Book of Songs</h2>
+        <div class="grid grid-3">
+          {songs.map((s) => (
+            <SongCard song={s} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
