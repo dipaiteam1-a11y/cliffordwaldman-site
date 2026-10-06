@@ -9,7 +9,7 @@ interface Props {
 const { eyebrow, title, lede, narrow } = Astro.props;
 ---
 
-<section class="page-hero">
+<section class="page-hero on-dark night-sky">
   <div class:list={['wrap', { 'wrap-narrow': narrow }]}>
     {eyebrow && <span class="eyebrow">{eyebrow}</span>}
     <h1><Rich text={title} /></h1>

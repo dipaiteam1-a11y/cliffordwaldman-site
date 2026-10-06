@@ -33,6 +33,7 @@ const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All 
 ---
 
 <BaseLayout title={d.title} description={d.summary.replace(/\[[^\]]*\]\s*/g, '') || `${d.title}, with synced lyrics.`} image={d.artwork?.src} section="/music">
+  <section class="song-stage on-dark night-sky">
   <div class="wrap song-wrap">
     <a class="back-link" href={backHref}>{backLabel}</a>
     <header class="song-head">
@@ -42,6 +43,10 @@ const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All 
     </header>
 
     <LyricsPlayer title={d.title} lyrics={d.lyrics} audio={d.audio} artwork={d.artwork} />
+  </div>
+  </section>
+
+  <div class="wrap song-rest">
 
     <div class="song-extra">
       <div class="prose">
@@ -127,7 +132,7 @@ const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All 
 
 <style>
   .song-wrap {
-    padding-top: 2.5rem;
+    padding-block: 2.5rem clamp(3rem, 7vw, 5rem);
   }
   .song-head {
     margin-bottom: 2.5rem;
@@ -138,9 +143,7 @@ const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All 
   .song-extra {
     display: grid;
     gap: 2rem;
-    margin-top: 4rem;
-    padding-top: 3rem;
-    border-top: 1px solid var(--line);
+    margin-top: clamp(3rem, 7vw, 4.5rem);
   }
   @media (min-width: 56rem) {
     .song-extra {

@@ -44,34 +44,69 @@ const starts = [
 ---
 
 <BaseLayout>
-  <section class="home-hero">
+  <section class="home-hero on-dark night-sky">
+    <div class="embers" aria-hidden="true">
+      {Array.from({ length: 16 }, (_, i) => <span style={`--i:${i}`} />)}
+    </div>
     <div class="wrap home-hero-grid">
-      <div>
+      <div class="hero-copy">
         <span class="eyebrow">Clifford Waldman</span>
-        <h1>Come in. <em>This is where it all gathers.</em></h1>
+        <h1>Come in. <em class="glow-text">This is where it all gathers.</em></h1>
         <p class="lede"><Rich text={intro} /></p>
         <p class="hero-sub">
           Music and lyrics, writing, clinical psychology, Torah and spiritual reflection, workshops, and a growing
           community, all under one roof.
         </p>
         <div class="btn-row">
-          <a class="btn" href="/music">Listen to the music</a>
+          <a class="btn" href="/music">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg>
+            Listen to the music
+          </a>
           <a class="btn btn-ghost" href="/my-story">Read my story</a>
         </div>
       </div>
       <figure class="hero-portrait">
+        <div class="portrait-halo" aria-hidden="true"></div>
         <div class="portrait-frame">
           <mark class="placeholder">[Placeholder: portrait photo of Clifford]</mark>
         </div>
+        {
+          songs[0] && (
+            <a class="now-playing" href={`/music/${songs[0].id}`}>
+              <span class="eq" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+              <span class="np-text">
+                <span class="np-label">Featured song</span>
+                <span class="np-title"><Rich text={songs[0].data.title} /></span>
+              </span>
+            </a>
+          )
+        }
       </figure>
+    </div>
+    <div class="hero-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        {
+          [0, 1].map(() => (
+            <span>
+              Music &amp; Lyrics <b>✦</b> Lollipop Cruise <b>✦</b> Writing <b>✦</b> Psychology <b>✦</b> Torah{' '}
+              <b>✦</b> Workshops <b>✦</b> The Gathering Place <b>✦</b>{' '}
+            </span>
+          ))
+        }
+      </div>
     </div>
   </section>
 
-  <section class="section doors-section" aria-labelledby="doors-heading">
+  <section class="section doors-section on-dark" aria-labelledby="doors-heading">
     <div class="wrap">
       <div class="section-head center">
         <span class="eyebrow">The house</span>
-        <h2 id="doors-heading">Every door leads to the same hearth</h2>
+        <h2 id="doors-heading">Every door leads to <em class="glow-text">the same hearth</em></h2>
         <p>
           Each part of this site is a door. Walk through any of them and you'll find the same person, and the same
           invitation to sit down and stay a while.
@@ -90,7 +125,8 @@ const starts = [
       <div class="grid grid-3">
         {
           worlds.map((w) => (
-            <article class="card">
+            <article class="card world-card">
+              <span class="world-num" aria-hidden="true">0{worlds.indexOf(w) + 1}</span>
               <h3>
                 <a href={w.href}>{w.title}</a>
               </h3>
@@ -123,7 +159,7 @@ const starts = [
     </div>
   </section>
 
-  <section class="section section-sunk" aria-labelledby="gp-heading">
+  <section class="section gp-section on-dark night-sky" aria-labelledby="gp-heading">
     <div class="wrap gp-grid">
       <div>
         <span class="eyebrow">The Gathering Place</span>
@@ -166,63 +202,286 @@ const starts = [
 </BaseLayout>
 
 <style>
+  /* ------------------------------------------------------------ Hero */
   .home-hero {
-    position: relative;
-    isolation: isolate;
-    padding-block: clamp(3rem, 8vw, 6.5rem) clamp(2rem, 5vw, 3rem);
-    overflow: hidden;
-  }
-  .home-hero::before {
-    content: '';
-    position: absolute;
-    right: -10%;
-    top: -30%;
-    width: min(80vw, 52rem);
-    aspect-ratio: 1;
-    background: radial-gradient(circle, color-mix(in srgb, var(--hearth-1) 45%, transparent), transparent 62%);
-    z-index: -1;
+    padding-block: clamp(3.5rem, 9vw, 7rem) 0;
   }
   .home-hero-grid {
     display: grid;
-    gap: 2.5rem;
+    gap: 3rem;
     align-items: center;
   }
   @media (min-width: 56rem) {
     .home-hero-grid {
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 4rem;
     }
   }
   .home-hero h1 {
-    max-width: 14ch;
+    font-size: clamp(2.9rem, 7.4vw, 5.8rem);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    max-width: 12ch;
+    margin-bottom: 0.4em;
   }
   .home-hero h1 em {
     display: block;
     font-style: italic;
-    color: var(--accent);
+    font-weight: 400;
     font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 144;
+    padding-bottom: 0.08em;
+  }
+  .home-hero .lede {
+    color: var(--ink);
   }
   .hero-sub {
     color: var(--ink-soft);
     max-width: 36rem;
   }
+  .btn-row {
+    margin-top: 2rem;
+  }
+
+  /* portrait: an arched doorway lit from within */
   .hero-portrait {
-    margin: 0;
+    position: relative;
+    margin: 0 auto;
+    width: min(100%, 19rem);
+  }
+  @media (min-width: 56rem) {
+    .hero-portrait {
+      width: min(100%, 25rem);
+    }
+  }
+  .portrait-halo {
+    position: absolute;
+    inset: -12% -18% -6%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--hearth-2) 55%, transparent), transparent);
+    filter: blur(20px);
+    opacity: 0.75;
   }
   .portrait-frame {
+    position: relative;
     aspect-ratio: 4 / 5;
-    max-width: 24rem;
-    margin-inline: auto;
     display: grid;
     place-items: center;
-    padding: 1.5rem;
+    padding: 2rem;
     text-align: center;
-    border-radius: 999px 999px var(--radius-lg) var(--radius-lg);
+    border-radius: 999px 999px 28px 28px;
     background:
-      radial-gradient(circle at 50% 75%, color-mix(in srgb, var(--hearth-1) 55%, transparent), transparent 60%),
-      var(--bg-sunk);
-    border: 1.5px solid var(--line-strong);
-    box-shadow: var(--shadow);
+      radial-gradient(circle at 50% 78%, color-mix(in srgb, var(--hearth-1) 55%, transparent), transparent 55%),
+      linear-gradient(180deg, #2a1d2c, #1b1219);
+    border: 1px solid color-mix(in srgb, var(--hearth-1) 45%, transparent);
+    box-shadow:
+      0 0 0 10px color-mix(in srgb, var(--hearth-2) 7%, transparent),
+      0 0 0 11px color-mix(in srgb, var(--hearth-2) 22%, transparent),
+      0 40px 80px -30px rgb(0 0 0 / 0.9);
   }
+  .now-playing {
+    position: absolute;
+    left: -0.75rem;
+    bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.75rem 1.1rem 0.75rem 0.9rem;
+    border-radius: 18px;
+    background: color-mix(in srgb, #1c1622 78%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--hearth-1) 30%, transparent);
+    box-shadow: 0 20px 40px -18px rgb(0 0 0 / 0.9);
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform 0.25s, border-color 0.25s;
+  }
+  .now-playing:hover {
+    color: var(--ink);
+    transform: translateY(-3px);
+    border-color: var(--hearth-1);
+  }
+  .np-text {
+    display: grid;
+    line-height: 1.25;
+  }
+  .np-label {
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--hearth-1);
+  }
+  .np-title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+  }
+  .eq {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 1.4rem;
+  }
+  .eq i {
+    width: 4px;
+    height: 40%;
+    border-radius: 2px;
+    background: linear-gradient(var(--hearth-1), var(--hearth-2));
+  }
+  .eq i:nth-child(2) {
+    height: 90%;
+  }
+  .eq i:nth-child(3) {
+    height: 60%;
+  }
+  .eq i:nth-child(4) {
+    height: 75%;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .eq i {
+      animation: eq 1.1s ease-in-out infinite alternate;
+    }
+    .eq i:nth-child(2) {
+      animation-delay: -0.4s;
+    }
+    .eq i:nth-child(3) {
+      animation-delay: -0.8s;
+    }
+    .eq i:nth-child(4) {
+      animation-delay: -0.2s;
+    }
+  }
+  @keyframes eq {
+    to {
+      height: 20%;
+    }
+  }
+
+  /* embers drifting up from the hearth */
+  .embers {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .embers span {
+    position: absolute;
+    bottom: -10px;
+    left: calc(4% + var(--i) * 6%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--hearth-1);
+    box-shadow: 0 0 10px 2px var(--hearth-2);
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .embers span {
+      animation: rise calc(9s + var(--i) * 0.7s) linear infinite;
+      animation-delay: calc(var(--i) * -1.3s);
+    }
+    .embers span:nth-child(3n) {
+      width: 3px;
+      height: 3px;
+    }
+    .embers span:nth-child(4n + 1) {
+      width: 5px;
+      height: 5px;
+    }
+  }
+  @keyframes rise {
+    0% {
+      transform: translate(0, 0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.9;
+    }
+    50% {
+      transform: translate(24px, -45vh);
+    }
+    85% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate(-16px, -95vh);
+      opacity: 0;
+    }
+  }
+
+  /* drifting band of section names */
+  .hero-marquee {
+    margin-top: clamp(3.5rem, 8vw, 6rem);
+    border-block: 1px solid color-mix(in srgb, var(--hearth-1) 18%, transparent);
+    background: rgb(0 0 0 / 0.18);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .marquee-track {
+    display: inline-flex;
+    padding-block: 1rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: var(--ink-soft);
+  }
+  .marquee-track span {
+    padding-right: 1.5rem;
+  }
+  .marquee-track b {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--hearth-2);
+    margin-inline: 1.25rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee-track {
+      animation: marquee 48s linear infinite;
+    }
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ----------------------------------------------------------- Doors */
+  .doors-section {
+    background:
+      radial-gradient(55% 45% at 50% 60%, color-mix(in srgb, var(--hearth-2) 16%, transparent), transparent 70%),
+      linear-gradient(180deg, #1d1316 0%, #120e16 30%, #120e16 100%);
+  }
+
+  /* ----------------------------------------------------------- Rooms */
+  .world-card {
+    padding-top: 2rem;
+    overflow: hidden;
+  }
+  .world-num {
+    display: block;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 2.6rem;
+    line-height: 1;
+    margin-bottom: 0.6rem;
+    color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .world-card h3 {
+    font-size: 1.6rem;
+  }
+
+  /* -------------------------------------------------- Gathering place */
+  .gp-section .gp-card {
+    background: color-mix(in srgb, #1c1622 75%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-color: color-mix(in srgb, var(--hearth-1) 28%, transparent);
+  }
+  .gp-section .gp-card:hover {
+    transform: none;
+  }
+
+
   .center {
     text-align: center;
     margin-inline: auto;
@@ -270,12 +529,14 @@ const starts = [
     background: var(--bg-raised);
     text-decoration: none;
     color: var(--ink);
-    transition: border-color 0.2s, background-color 0.2s;
+    transition: border-color 0.2s, background-color 0.2s, transform 0.2s, box-shadow 0.2s;
   }
   .starts a:hover {
     border-color: var(--accent);
-    background: var(--accent-wash);
+    background: var(--bg-raised);
     color: var(--ink);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
   }
   .start-from {
     font-size: 0.9rem;

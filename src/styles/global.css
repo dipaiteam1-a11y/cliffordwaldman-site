@@ -12,43 +12,45 @@
 :root {
   color-scheme: light;
 
-  --bg: #f7f0e3;
-  --bg-raised: #fffaf2;
-  --bg-sunk: #eee3cf;
-  --ink: #2a211b;
-  --ink-soft: #5a4b3f;
-  --ink-faint: #685a4d;
-  --line: #d9c8ac;
-  --line-strong: #bca787;
+  --bg: #faf5ec;
+  --bg-raised: #fffcf6;
+  --bg-sunk: #f2e9da;
+  --ink: #1d1612;
+  --ink-soft: #4f4239;
+  --ink-faint: #67584c;
+  --line: #e4d6c0;
+  --line-strong: #c9b392;
 
-  --accent: #9e4320;
-  --accent-hover: #83361a;
-  --accent-ink: #fffaf2;
-  --accent-wash: #f3dcc9;
+  --accent: #b03a12;
+  --accent-hover: #8e2d0c;
+  --accent-ink: #fffcf6;
+  --accent-wash: #f8dfcf;
+  --gold: #b9832a;
 
-  --hearth-1: #f6c98a;
-  --hearth-2: #e8955a;
-  --hearth-3: #b8542a;
+  --hearth-1: #ffcf8a;
+  --hearth-2: #f08a4b;
+  --hearth-3: #c2461b;
 
-  --door-story: #6b4a6e;
-  --door-music: #9e4320;
-  --door-lollipop: #a63d62;
-  --door-videos: #7a4f2a;
-  --door-writing: #36597a;
-  --door-psychology: #2c6663;
-  --door-spirit: #7d5f14;
-  --door-workshops: #4f5d2f;
-  --door-contact: #5a4b3f;
+  --door-story: #7a4c86;
+  --door-music: #b03a12;
+  --door-lollipop: #b23a6a;
+  --door-videos: #8a5523;
+  --door-writing: #2f5f8f;
+  --door-psychology: #1f6f69;
+  --door-spirit: #8a6410;
+  --door-workshops: #4f6b22;
+  --door-contact: #4f4239;
 
-  --placeholder-bg: #fbeaa6;
-  --placeholder-ink: #5c4200;
-  --placeholder-line: #d8b640;
+  --placeholder-bg: color-mix(in srgb, #f3c64a 22%, transparent);
+  --placeholder-ink: inherit;
+  --placeholder-line: #c99a1e;
 
-  --notice-bg: #fbe6df;
-  --notice-line: #b44a2c;
+  --notice-bg: #fbe6dc;
+  --notice-line: #b03a12;
 
   --focus: #1f5fbf;
-  --shadow: 0 1px 2px rgb(60 40 20 / 0.06), 0 8px 24px -12px rgb(60 40 20 / 0.25);
+  --shadow: 0 1px 2px rgb(40 20 10 / 0.05), 0 12px 32px -16px rgb(60 30 10 / 0.28);
+  --shadow-lift: 0 2px 4px rgb(40 20 10 / 0.06), 0 26px 50px -22px rgb(80 35 10 / 0.38);
 
   --font-display: 'Fraunces Variable', 'Frank Ruhl Libre Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --font-body: 'Source Sans 3 Variable', 'Frank Ruhl Libre Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -70,73 +72,84 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #1a1512;
-    --bg-raised: #241d18;
-    --bg-sunk: #130f0c;
-    --ink: #f1e7d8;
-    --ink-soft: #cdbda8;
-    --ink-faint: #a8977f;
-    --line: #3b3029;
-    --line-strong: #56473b;
-    --accent: #eb9a68;
-    --accent-hover: #f4b58c;
-    --accent-ink: #1a1512;
-    --accent-wash: #3b2518;
-    --hearth-1: #f3c07a;
-    --hearth-2: #d97a3f;
-    --hearth-3: #7a3317;
-    --door-story: #c9a3cc;
-    --door-music: #eb9a68;
-    --door-lollipop: #ee8fb1;
-    --door-videos: #d9ad7c;
-    --door-writing: #93b8dc;
-    --door-psychology: #86c6c1;
-    --door-spirit: #e0c066;
-    --door-workshops: #b5c37f;
-    --door-contact: #cdbda8;
-    --placeholder-bg: #4a3a0c;
-    --placeholder-ink: #ffe38c;
-    --placeholder-line: #9c7d1d;
-    --notice-bg: #3a1f17;
-    --notice-line: #e0785a;
+    --bg: #120e16;
+    --bg-raised: #1c1622;
+    --bg-sunk: #0b0810;
+    --ink: #f6ede1;
+    --ink-soft: #d4c6b6;
+    --ink-faint: #a99a8c;
+    --line: #2f2636;
+    --line-strong: #4a3d52;
+    --accent: #f4a36c;
+    --accent-hover: #ffc196;
+    --accent-ink: #1a0f0a;
+    --accent-wash: #3a2219;
+    --gold: #f0c674;
+    --hearth-1: #ffd08a;
+    --hearth-2: #f08a4b;
+    --hearth-3: #8f2f12;
+    --door-story: #d3a8de;
+    --door-music: #f4a36c;
+    --door-lollipop: #f493bc;
+    --door-videos: #e4b37a;
+    --door-writing: #98c1ea;
+    --door-psychology: #7fd3ca;
+    --door-spirit: #f0cd6a;
+    --door-workshops: #b9d17f;
+    --door-contact: #d4c6b6;
+    --placeholder-bg: color-mix(in srgb, #f3c64a 16%, transparent);
+    --placeholder-ink: inherit;
+    --placeholder-line: #b8902a;
+    --notice-bg: #34181a;
+    --notice-line: #f08a65;
     --focus: #8ab4ff;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -14px rgb(0 0 0 / 0.7);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 14px 34px -16px rgb(0 0 0 / 0.75);
+    --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.4), 0 30px 60px -24px rgb(0 0 0 / 0.85);
   }
 }
 
-:root[data-theme='dark'] {
+/* .on-dark: a night-sky band (header, heroes, footer) that stays dark in
+   both themes, so the site always has its lamplit-at-night frame. */
+:root[data-theme='dark'],
+.on-dark {
   color-scheme: dark;
-  --bg: #1a1512;
-  --bg-raised: #241d18;
-  --bg-sunk: #130f0c;
-  --ink: #f1e7d8;
-  --ink-soft: #cdbda8;
-  --ink-faint: #a8977f;
-  --line: #3b3029;
-  --line-strong: #56473b;
-  --accent: #eb9a68;
-  --accent-hover: #f4b58c;
-  --accent-ink: #1a1512;
-  --accent-wash: #3b2518;
-  --hearth-1: #f3c07a;
-  --hearth-2: #d97a3f;
-  --hearth-3: #7a3317;
-  --door-story: #c9a3cc;
-  --door-music: #eb9a68;
-  --door-lollipop: #ee8fb1;
-  --door-videos: #d9ad7c;
-  --door-writing: #93b8dc;
-  --door-psychology: #86c6c1;
-  --door-spirit: #e0c066;
-  --door-workshops: #b5c37f;
-  --door-contact: #cdbda8;
-  --placeholder-bg: #4a3a0c;
-  --placeholder-ink: #ffe38c;
-  --placeholder-line: #9c7d1d;
-  --notice-bg: #3a1f17;
-  --notice-line: #e0785a;
+  --bg: #120e16;
+  --bg-raised: #1c1622;
+  --bg-sunk: #0b0810;
+  --ink: #f6ede1;
+  --ink-soft: #d4c6b6;
+  --ink-faint: #a99a8c;
+  --line: #2f2636;
+  --line-strong: #4a3d52;
+  --accent: #f4a36c;
+  --accent-hover: #ffc196;
+  --accent-ink: #1a0f0a;
+  --accent-wash: #3a2219;
+  --gold: #f0c674;
+  --hearth-1: #ffd08a;
+  --hearth-2: #f08a4b;
+  --hearth-3: #8f2f12;
+  --door-story: #d3a8de;
+  --door-music: #f4a36c;
+  --door-lollipop: #f493bc;
+  --door-videos: #e4b37a;
+  --door-writing: #98c1ea;
+  --door-psychology: #7fd3ca;
+  --door-spirit: #f0cd6a;
+  --door-workshops: #b9d17f;
+  --door-contact: #d4c6b6;
+  --placeholder-bg: color-mix(in srgb, #f3c64a 16%, transparent);
+  --placeholder-ink: inherit;
+  --placeholder-line: #b8902a;
+  --notice-bg: #34181a;
+  --notice-line: #f08a65;
   --focus: #8ab4ff;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 14px 34px -16px rgb(0 0 0 / 0.75);
+  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.4), 0 30px 60px -24px rgb(0 0 0 / 0.85);
+}
+.on-dark {
+  background-color: var(--bg);
+  color: var(--ink);
 }
 
 /* ------------------------------------------------------------- Base */
@@ -188,12 +201,12 @@ h4 {
   text-wrap: balance;
 }
 h1 {
-  font-size: clamp(2.3rem, 5.5vw, 4rem);
+  font-size: clamp(2.5rem, 6vw, 4.6rem);
   font-weight: 450;
   font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 144;
 }
 h2 {
-  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+  font-size: clamp(1.9rem, 3.8vw, 2.9rem);
 }
 h3 {
   font-size: clamp(1.25rem, 2vw, 1.5rem);
@@ -292,7 +305,7 @@ main {
 }
 
 .section {
-  padding-block: clamp(3rem, 7vw, 5.5rem);
+  padding-block: clamp(3.5rem, 8vw, 6.5rem);
 }
 .section-sunk {
   background: var(--bg-sunk);
@@ -316,7 +329,17 @@ main {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 1.6em;
+  height: 1px;
+  margin-right: 0.7em;
+  vertical-align: 0.3em;
+  background: currentColor;
+  opacity: 0.7;
 }
 
 .lede {
@@ -341,29 +364,73 @@ main {
   margin-top: 1rem;
 }
 
-/* ------------------------------------------------------- Page hero */
+/* ------------------------------------------------ Night sky + hero */
 
-.page-hero {
-  padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 5vw, 3.5rem);
+/* Layered night: an ember glow rising from below, a violet haze, a few
+   stars and a little film grain. Used by heroes and dark bands. */
+.night-sky {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
+  overflow: clip; /* clip, not hidden, so sticky children keep working */
+  background:
+    radial-gradient(120% 70% at 50% 115%, color-mix(in srgb, var(--hearth-2) 34%, transparent), transparent 62%),
+    radial-gradient(60% 50% at 85% 0%, rgb(124 82 170 / 0.22), transparent 70%),
+    radial-gradient(50% 40% at 5% 20%, rgb(60 70 140 / 0.18), transparent 70%),
+    linear-gradient(180deg, #0d0a12 0%, #151019 55%, #1d1316 100%);
 }
-.page-hero::before {
-  /* a soft lamplight glow in the corner */
+.night-sky::before {
+  /* stars */
   content: '';
   position: absolute;
-  inset: -20% auto auto -10%;
-  width: min(60vw, 40rem);
-  aspect-ratio: 1;
-  background: radial-gradient(circle, color-mix(in srgb, var(--hearth-1) 38%, transparent), transparent 65%);
+  inset: 0;
   z-index: -1;
   pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgb(255 240 220 / 0.8), transparent 60%),
+    radial-gradient(1px 1px at 27% 62%, rgb(255 240 220 / 0.5), transparent 60%),
+    radial-gradient(1.5px 1.5px at 41% 12%, rgb(255 240 220 / 0.7), transparent 60%),
+    radial-gradient(1px 1px at 58% 34%, rgb(255 240 220 / 0.45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 73% 20%, rgb(255 240 220 / 0.75), transparent 60%),
+    radial-gradient(1px 1px at 88% 48%, rgb(255 240 220 / 0.5), transparent 60%),
+    radial-gradient(1px 1px at 93% 9%, rgb(255 240 220 / 0.6), transparent 60%),
+    radial-gradient(1px 1px at 6% 78%, rgb(255 240 220 / 0.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 66% 70%, rgb(255 240 220 / 0.35), transparent 60%);
+}
+.night-sky::after {
+  /* grain */
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.page-hero {
+  padding-block: clamp(3.5rem, 9vw, 7rem) clamp(3rem, 7vw, 5rem);
 }
 .page-hero h1 {
   max-width: 18ch;
 }
 .page-hero .lede {
   margin-top: 1rem;
+}
+/* a thin ember line where the night meets the page */
+.page-hero,
+.ember-edge {
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--hearth-2) 45%, transparent);
+}
+
+/* Gradient ember text for display headings on dark bands */
+.glow-text {
+  color: var(--hearth-1);
+  background: linear-gradient(100deg, #ffe3b0 0%, #ffbe7a 35%, #f08a4b 70%, #ffcf8a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* ---------------------------------------------------------- Buttons */
@@ -373,31 +440,36 @@ main {
   align-items: center;
   gap: 0.5rem;
   font: inherit;
-  font-weight: 600;
+  font-weight: 650;
   font-size: 1rem;
   line-height: 1.2;
-  padding: 0.8rem 1.25rem;
+  padding: 0.85rem 1.4rem;
   border-radius: 999px;
-  border: 1.5px solid var(--accent);
-  background: var(--accent);
+  border: 1.5px solid transparent;
+  background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, var(--hearth-3)) 100%);
   color: var(--accent-ink);
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+  box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--hearth-2) 70%, transparent);
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 .btn:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
   color: var(--accent-ink);
   text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -10px color-mix(in srgb, var(--hearth-2) 85%, transparent);
 }
 .btn-ghost {
   background: transparent;
-  color: var(--accent);
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--ink) 35%, transparent);
+  box-shadow: none;
 }
 .btn-ghost:hover {
-  background: var(--accent-wash);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  border-color: var(--ink);
   color: var(--ink);
+  box-shadow: none;
 }
 .btn-row {
   display: flex;
@@ -427,10 +499,10 @@ main {
   flex-direction: column;
   background: var(--bg-raised);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
   box-shadow: var(--shadow);
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
 .card h3 {
   margin-bottom: 0.35em;
@@ -448,6 +520,8 @@ main {
 }
 .card:hover {
   border-color: var(--line-strong);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
 }
 /* Show the focus ring on the whole card (falls back to the link's own ring) */
 @supports selector(:has(a)) {
@@ -467,8 +541,8 @@ main {
   margin-top: auto;
 }
 .card-art {
-  margin: -1.5rem -1.5rem 1.25rem;
-  border-radius: var(--radius) var(--radius) 0 0;
+  margin: -1.6rem -1.6rem 1.25rem;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   overflow: hidden;
   aspect-ratio: 16 / 10;
   background: var(--bg-sunk);
@@ -477,6 +551,10 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.card:hover .card-art img {
+  transform: scale(1.05);
 }
 
 .meta {
@@ -560,13 +638,14 @@ main {
   font-size: 1.15em;
 }
 
-/* Placeholder text — deliberately loud so nothing unfinished slips through */
+/* Placeholder text: clearly marked, but quiet enough to judge the design */
 mark.placeholder,
 .placeholder-block {
   background: var(--placeholder-bg);
   color: var(--placeholder-ink);
   border-radius: 4px;
-  padding: 0.05em 0.3em;
+  padding: 0.02em 0.25em;
+  box-shadow: inset 0 -1.5px 0 var(--placeholder-line);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   font-style: normal;
@@ -782,4 +861,9 @@ mark.placeholder,
 .pager-next {
   text-align: right;
   margin-left: auto;
+}
+
+/* Breathing room before the footer on pages that end in plain content */
+main > :last-child:not(section) {
+  margin-bottom: clamp(3.5rem, 8vw, 6rem);
 }

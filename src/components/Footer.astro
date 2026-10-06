@@ -6,7 +6,7 @@ const year = new Date().getFullYear();
 const flat = nav.filter((n) => n.href !== '/').flatMap((n) => (n.children ? n.children : [n]));
 ---
 
-<footer class="site-footer">
+<footer class="site-footer on-dark night-sky">
   <div class="wrap footer-grid">
     <div class="footer-about">
       <p class="footer-name">{site.name}</p>
@@ -35,10 +35,9 @@ const flat = nav.filter((n) => n.href !== '/').flatMap((n) => (n.children ? n.ch
 
 <style>
   .site-footer {
-    margin-top: 4rem;
-    background: var(--bg-sunk);
-    border-top: 1px solid var(--line);
-    padding-top: 3.5rem;
+    margin-top: 0;
+    border-top: 1px solid color-mix(in srgb, var(--hearth-2) 30%, var(--line));
+    padding-top: clamp(3.5rem, 8vw, 5.5rem);
     font-size: 1rem;
   }
   .footer-grid {
@@ -54,7 +53,8 @@ const flat = nav.filter((n) => n.href !== '/').flatMap((n) => (n.children ? n.ch
   .footer-name {
     font-family: var(--font-display);
     font-variation-settings: 'SOFT' 100, 'WONK' 1;
-    font-size: 1.6rem;
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    color: var(--hearth-1);
     margin-bottom: 0.5rem;
   }
   .footer-about p {
