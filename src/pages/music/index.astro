@@ -1,4 +1,5 @@
 ---
+import stagePhoto from '../../assets/clifford/stage-microphone.webp';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -17,6 +18,9 @@ const groups = [
   <PageHero
     eyebrow="Music & Lyrics"
     title="Songs, with the words beside them"
+    image={stagePhoto}
+    imageAlt="Clifford Waldman singing into a microphone under stage lights"
+    imagePosition="60% 30%"
     lede="Open any song to hear it with its lyrics. The current line lights up as it's sung, and you can select a line to jump straight to it."
   >
     <div class="btn-row">

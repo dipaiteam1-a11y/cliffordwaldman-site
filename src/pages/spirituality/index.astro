@@ -1,4 +1,5 @@
 ---
+import montagePhoto from '../../assets/clifford/gathering-montage.webp';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -16,6 +17,9 @@ const posts = (await getCollection('spirituality', ({ data }) => !data.draft)).s
     <PageHero
       eyebrow="Spirituality & Torah"
       title="Reflections along the way"
+      image={montagePhoto}
+      imageAlt="Clifford Waldman at sunset above Jerusalem, surrounded by a Torah scroll, books and music"
+      imagePosition="65% 35%"
       lede="Torah thoughts, faith and spiritual growth, and the places where the divine and the psychological meet."
     >
       <p class="rss"><a href="/spirituality/rss.xml">Subscribe via RSS</a></p>

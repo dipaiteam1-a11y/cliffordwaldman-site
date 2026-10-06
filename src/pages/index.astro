@@ -5,6 +5,11 @@ import DoorsMap from '../components/DoorsMap.astro';
 import SongCard from '../components/SongCard.astro';
 import SignupForm from '../components/SignupForm.astro';
 import Rich from '../components/Rich.astro';
+import { Image } from 'astro:assets';
+import sunsetPhoto from '../assets/clifford/sunset-guitar.webp';
+import stagePhoto from '../assets/clifford/stage-microphone.webp';
+import studyPhoto from '../assets/clifford/study-portrait.webp';
+import montagePhoto from '../assets/clifford/gathering-montage.webp';
 
 const songs = (await getCollection('songs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
 
@@ -16,18 +21,27 @@ const worlds = [
     text: "[Clifford's sentence about his music and creative world.] Songs with their lyrics shown beside the music, and the Lollipop Cruise universe.",
     href: '/music',
     cta: 'Listen',
+    img: stagePhoto,
+    alt: 'Clifford Waldman singing on stage',
+    pos: '55% 25%',
   },
   {
     title: 'Psychology',
     text: "[Clifford's sentence about his clinical work.] Professional background, areas of work and how to get in touch.",
     href: '/psychology',
     cta: 'Clinical practice',
+    img: studyPhoto,
+    alt: 'Clifford Waldman in his study',
+    pos: '40% 30%',
   },
   {
     title: 'Spirituality & teaching',
     text: "[Clifford's sentence about his spiritual and teaching work.] Torah thoughts, reflections, workshops and lectures.",
     href: '/spirituality',
     cta: 'Read reflections',
+    img: montagePhoto,
+    alt: 'Clifford Waldman at sunset above Jerusalem, with a Torah scroll and books',
+    pos: '58% 30%',
   },
 ];
 
@@ -48,6 +62,16 @@ const starts = [
     <div class="embers" aria-hidden="true">
       {Array.from({ length: 16 }, (_, i) => <span style={`--i:${i}`} />)}
     </div>
+    <div class="home-hero-photo">
+      <Image
+        src={sunsetPhoto}
+        alt="Clifford Waldman with his guitar at sunset, looking out over Jerusalem"
+        widths={[640, 1024, 1600, 1942]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
     <div class="wrap home-hero-grid">
       <div class="hero-copy">
         <span class="eyebrow">Clifford Waldman</span>
@@ -63,12 +87,6 @@ const starts = [
             Listen to the music
           </a>
           <a class="btn btn-ghost" href="/my-story">Read my story</a>
-        </div>
-      </div>
-      <figure class="hero-portrait">
-        <div class="portrait-halo" aria-hidden="true"></div>
-        <div class="portrait-frame">
-          <mark class="placeholder">[Placeholder: portrait photo of Clifford]</mark>
         </div>
         {
           songs[0] && (
@@ -86,7 +104,7 @@ const starts = [
             </a>
           )
         }
-      </figure>
+      </div>
     </div>
     <div class="hero-marquee" aria-hidden="true">
       <div class="marquee-track">
@@ -126,6 +144,9 @@ const starts = [
         {
           worlds.map((w) => (
             <article class="card world-card">
+              <div class="card-art world-art">
+                <Image src={w.img} alt={w.alt} widths={[400, 700]} sizes="(min-width: 64rem) 24rem, 100vw" style={`object-position:${w.pos}`} />
+              </div>
               <span class="world-num" aria-hidden="true">0{worlds.indexOf(w) + 1}</span>
               <h3>
                 <a href={w.href}>{w.title}</a>
@@ -218,7 +239,8 @@ const starts = [
     }
   }
   .home-hero h1 {
-    font-size: clamp(2.9rem, 7.4vw, 5.8rem);
+    font-size: clamp(2.9rem, 6.6vw, 5.4rem);
+    text-shadow: 0 2px 30px rgb(0 0 0 / 0.5);
     line-height: 1.02;
     letter-spacing: -0.025em;
     max-width: 12ch;
@@ -242,46 +264,54 @@ const starts = [
     margin-top: 2rem;
   }
 
-  /* portrait: an arched doorway lit from within */
-  .hero-portrait {
+  /* Clifford at sunset: full-bleed on large screens, a banner on phones */
+  .home-hero-photo {
     position: relative;
-    margin: 0 auto;
-    width: min(100%, 19rem);
+    margin-top: calc(-1 * clamp(3.5rem, 9vw, 7rem));
+    margin-bottom: 1rem;
+    aspect-ratio: 4 / 3;
+  }
+  .home-hero-photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 72% 30%;
+  }
+  .home-hero-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(13 10 18 / 0.1) 40%, #110d15 100%);
   }
   @media (min-width: 56rem) {
-    .hero-portrait {
-      width: min(100%, 25rem);
+    .home-hero {
+      min-height: min(52rem, calc(100svh - var(--header-h)));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .home-hero-photo {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      aspect-ratio: auto;
+      z-index: -1;
+    }
+    .home-hero-photo :global(img) {
+      object-position: 34% 30%;
+    }
+    .home-hero-photo::after {
+      background:
+        linear-gradient(90deg, #0f0b13 0%, rgb(15 11 19 / 0.88) 28%, rgb(15 11 19 / 0.35) 50%, transparent 70%),
+        linear-gradient(180deg, rgb(15 11 19 / 0.35) 0%, transparent 25%, transparent 60%, #120e16 100%);
+    }
+    .home-hero-grid {
+      grid-template-columns: minmax(0, 40rem);
     }
   }
-  .portrait-halo {
-    position: absolute;
-    inset: -12% -18% -6%;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--hearth-2) 55%, transparent), transparent);
-    filter: blur(20px);
-    opacity: 0.75;
-  }
-  .portrait-frame {
-    position: relative;
-    aspect-ratio: 4 / 5;
-    display: grid;
-    place-items: center;
-    padding: 2rem;
-    text-align: center;
-    border-radius: 999px 999px 28px 28px;
-    background:
-      radial-gradient(circle at 50% 78%, color-mix(in srgb, var(--hearth-1) 55%, transparent), transparent 55%),
-      linear-gradient(180deg, #2a1d2c, #1b1219);
-    border: 1px solid color-mix(in srgb, var(--hearth-1) 45%, transparent);
-    box-shadow:
-      0 0 0 10px color-mix(in srgb, var(--hearth-2) 7%, transparent),
-      0 0 0 11px color-mix(in srgb, var(--hearth-2) 22%, transparent),
-      0 40px 80px -30px rgb(0 0 0 / 0.9);
-  }
   .now-playing {
-    position: absolute;
-    left: -0.75rem;
-    bottom: 1.75rem;
-    display: flex;
+    margin-top: 2rem;
+    display: inline-flex;
     align-items: center;
     gap: 0.8rem;
     padding: 0.75rem 1.1rem 0.75rem 0.9rem;
@@ -454,8 +484,10 @@ const starts = [
 
   /* ----------------------------------------------------------- Rooms */
   .world-card {
-    padding-top: 2rem;
     overflow: hidden;
+  }
+  .world-art {
+    aspect-ratio: 16 / 10;
   }
   .world-num {
     display: block;
