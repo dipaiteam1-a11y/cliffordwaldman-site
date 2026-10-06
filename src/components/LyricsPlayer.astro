@@ -12,7 +12,7 @@ import { splitPlaceholders } from '../lib/format';
 interface Props {
   title: string;
   lyrics: string;
-  audio: { type: 'file'; src: string } | { type: 'soundcloud'; url: string };
+  audio: { type: 'file' | 'soundcloud'; src?: string; url?: string };
   artwork?: { src: string; alt: string };
 }
 
@@ -20,7 +20,7 @@ const { title, lyrics, audio, artwork } = Astro.props;
 const parsed = parseLrc(lyrics);
 const scSrc =
   audio.type === 'soundcloud'
-    ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(audio.url)}&color=%239e4320&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false`
+    ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(audio.url ?? '')}&color=%239e4320&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false`
     : '';
 ---
 

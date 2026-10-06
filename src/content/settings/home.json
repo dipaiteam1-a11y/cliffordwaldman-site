@@ -1,0 +1,31 @@
+{
+  "eyebrow": "Clifford Waldman",
+  "headline": "Come in.",
+  "headlineAccent": "This is where it all gathers.",
+  "intro": "Clifford Waldman is a songwriter, clinical psychologist, writer and teacher. This is his home online, where the music, the ideas and the people all come together.",
+  "subline": "Music and lyrics, writing, clinical psychology, Torah and spiritual reflection, workshops, and a growing community, all under one roof.",
+  "primaryButton": { "label": "Listen to the music", "url": "/music" },
+  "secondaryButton": { "label": "Read my story", "url": "/my-story" },
+  "showMarquee": true,
+  "rooms": [
+    {
+      "title": "Music & creative work",
+      "text": "Songwriting at the heart of it: songs with their lyrics shown beside the music, and the Lollipop Cruise universe.",
+      "url": "/music",
+      "cta": "Listen"
+    },
+    {
+      "title": "Psychology",
+      "text": "A clinical practice, described plainly: the professional side of the work, and a private way to get in touch.",
+      "url": "/psychology",
+      "cta": "Clinical practice"
+    },
+    {
+      "title": "Spirituality & teaching",
+      "text": "Torah thoughts and reflections on faith and growth, alongside workshops and lectures.",
+      "url": "/spirituality",
+      "cta": "Read reflections"
+    }
+  ],
+  "gatheringText": "Music, psychology and faith all grow richer in conversation. This is a place for that conversation to happen."
+}

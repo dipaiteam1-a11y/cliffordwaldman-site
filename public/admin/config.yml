@@ -1,0 +1,465 @@
+# ===========================================================================
+#  The Gathering Place: content dashboard (Decap CMS) at /admin
+#
+#  Who can do what is decided by GitHub, not by this file:
+#    Owner (repository owner) ......... everything, publishes straight away,
+#                                       approves Admin changes to settings,
+#                                       manages the team, deletes.
+#    Admin (collaborator, "Write") .... adds and edits content, uploads media,
+#                                       publishes content; changes to site
+#                                       settings, home page and Psychology
+#                                       wait for the Owner's approval.
+#  See /admin/guide.html and README → "Dashboard, Owner and Admin".
+# ===========================================================================
+
+backend:
+  name: github
+  repo: dipaiteam1-a11y/cliffordwaldman-site
+  branch: main
+  # Sign-in runs through the small PHP helper in /oauth (works on Hostinger).
+  base_url: https://cliffordwaldman.com
+  auth_endpoint: oauth/auth.php
+  squash_merges: true
+  commit_messages:
+    create: 'Add {{collection}} “{{slug}}”'
+    update: 'Update {{collection}} “{{slug}}”'
+    delete: 'Delete {{collection}} “{{slug}}”'
+    uploadMedia: 'Upload “{{path}}”'
+    deleteMedia: 'Delete “{{path}}”'
+
+# Every change becomes a draft → review → publish card (a pull request).
+publish_mode: editorial_workflow
+
+# For trying the dashboard on your own computer: run `npx decap-server`
+# next to `npm run dev`, then open http://localhost:4321/admin
+local_backend: true
+
+site_url: https://cliffordwaldman.com
+display_url: https://cliffordwaldman.com
+logo_url: /admin/logo.svg
+locale: en
+
+media_folder: public/uploads
+public_folder: /uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+
+# Reusable field groups ----------------------------------------------------
+_artwork: &artwork
+  label: Artwork
+  name: artwork
+  widget: object
+  required: false
+  collapsed: true
+  fields:
+    - { label: Image, name: src, widget: image, required: false }
+    - { label: Image description (for screen readers), name: alt, widget: string, required: false }
+
+_draft: &draft
+  label: Hidden (draft)
+  name: draft
+  widget: boolean
+  default: false
+  required: false
+  hint: Switch on to keep this off the site while you work on it.
+
+_sample: &sample
+  label: Example content
+  name: sample
+  widget: boolean
+  default: false
+  required: false
+  hint: Example entries ship with the site and stay hidden. Switch off once this holds real content.
+
+_song_relation: &song_relation
+  widget: relation
+  collection: songs
+  search_fields: [title]
+  value_field: '{{slug}}'
+  display_fields: [title]
+
+collections:
+  # ------------------------------------------------------------------ MUSIC
+  - name: songs
+    label: '🎵 Songs'
+    label_singular: Song
+    description: Songs with synced lyrics. The lyrics light up line by line as the song plays.
+    folder: src/content/songs
+    create: true
+    delete: true
+    slug: '{{slug}}'
+    identifier_field: title
+    summary: '{{title}} · {{collection}}'
+    sortable_fields: [order, title]
+    view_filters:
+      - { label: Lollipop Cruise, field: collection, pattern: lollipop-cruise }
+      - { label: Book of Songs, field: collection, pattern: book-of-songs }
+      - { label: Singles, field: collection, pattern: single }
+      - { label: Hidden drafts, field: draft, pattern: true }
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Belongs to
+        name: collection
+        widget: select
+        default: single
+        options:
+          - { label: Lollipop Cruise, value: lollipop-cruise }
+          - { label: Book of Songs, value: book-of-songs }
+          - { label: Single, value: single }
+      - { label: Short description, name: summary, widget: text, hint: One or two sentences for song lists. }
+      - label: Audio
+        name: audio
+        widget: object
+        fields:
+          - label: Where is the audio?
+            name: type
+            widget: select
+            default: file
+            options:
+              - { label: Upload an audio file (MP3), value: file }
+              - { label: A SoundCloud track, value: soundcloud }
+          - { label: Audio file, name: src, widget: file, required: false, hint: 'Use when "Upload an audio file" is chosen.' }
+          - { label: SoundCloud link, name: url, widget: string, required: false, hint: 'Use when "SoundCloud" is chosen, e.g. https://soundcloud.com/name/song' }
+      - label: Lyrics
+        name: lyrics
+        widget: text
+        hint: 'For synced lyrics put the time before each line, like [00:12.50] First line. Plain lines work too (no highlighting). An empty timed line, e.g. [01:02.00], shows a ♪ break.'
+      - *artwork
+      - { label: YouTube video (link or ID), name: youtube, widget: string, required: false }
+      - label: Credits
+        name: credits
+        widget: list
+        required: false
+        collapsed: true
+        summary: '{{fields.role}}: {{fields.name}}'
+        fields:
+          - { label: Role, name: role, widget: string }
+          - { label: Name, name: name, widget: string }
+      - { label: Year, name: year, widget: string, required: false }
+      - { label: Order in lists, name: order, widget: number, value_type: int, default: 100, hint: Lower numbers come first. }
+      - *draft
+      - *sample
+      - { label: About this song, name: body, widget: markdown, required: false }
+
+  # -------------------------------------------------------- LOLLIPOP CRUISE
+  - name: chapters
+    label: '⛵ Lollipop · Chapters'
+    label_singular: Chapter
+    folder: src/content/lollipop/chapters
+    create: true
+    slug: '{{fields.order}}-{{slug}}'
+    summary: 'Part {{part}} · {{order}}. {{title}} ({{status}})'
+    sortable_fields: [order, title]
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Part number, name: part, widget: number, value_type: int, default: 1 }
+      - { label: Part title, name: partTitle, widget: string, required: false }
+      - { label: Chapter number, name: order, widget: number, value_type: int }
+      - { label: Short description, name: summary, widget: text }
+      - label: Status
+        name: status
+        widget: select
+        default: published
+        options:
+          - { label: Published, value: published }
+          - { label: In progress, value: in-progress }
+          - { label: Coming in the future, value: future }
+      - { <<: *song_relation, label: Songs in this chapter, name: songs, multiple: true, required: false }
+      - label: Characters in this chapter
+        name: characters
+        widget: relation
+        collection: characters
+        search_fields: [name]
+        value_field: '{{slug}}'
+        display_fields: [name]
+        multiple: true
+        required: false
+      - *artwork
+      - *sample
+      - { label: Chapter text, name: body, widget: markdown, required: false }
+
+  - name: characters
+    label: '⛵ Lollipop · Characters'
+    label_singular: Character
+    folder: src/content/lollipop/characters
+    create: true
+    slug: '{{fields.name}}'
+    identifier_field: name
+    summary: '{{name}} · {{role}}'
+    fields:
+      - { label: Name, name: name, widget: string }
+      - { label: Role, name: role, widget: string }
+      - { label: Short description, name: summary, widget: text }
+      - { <<: *song_relation, label: Their songs, name: songs, multiple: true, required: false }
+      - *artwork
+      - { label: Order in lists, name: order, widget: number, value_type: int, default: 100 }
+      - *sample
+      - { label: About this character, name: body, widget: markdown, required: false }
+
+  - name: stories
+    label: '⛵ Lollipop · Stories'
+    label_singular: Story
+    folder: src/content/lollipop/stories
+    create: true
+    slug: '{{slug}}'
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Short description, name: summary, widget: text }
+      - { <<: *song_relation, label: Song it belongs to, name: song, required: false }
+      - label: Chapter it belongs to
+        name: chapter
+        widget: relation
+        collection: chapters
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        required: false
+      - { label: Date, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
+      - *artwork
+      - { label: Order in lists, name: order, widget: number, value_type: int, default: 100 }
+      - *sample
+      - { label: Story, name: body, widget: markdown }
+
+  # ---------------------------------------------------------------- WRITING
+  - name: writing
+    label: '✍️ Writing & books'
+    label_singular: Piece of writing
+    folder: src/content/writing
+    create: true
+    slug: '{{slug}}'
+    summary: '{{title}} · {{kind}}'
+    view_filters:
+      - { label: Essays, field: kind, pattern: essay }
+      - { label: Books, field: kind, pattern: book }
+      - { label: Literary, field: kind, pattern: literary }
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Kind
+        name: kind
+        widget: select
+        options:
+          - { label: Essay, value: essay }
+          - { label: Book, value: book }
+          - { label: Literary work, value: literary }
+          - { label: Book of Songs, value: book-of-songs }
+          - { label: Future writing, value: future }
+      - label: Status
+        name: status
+        widget: select
+        default: published
+        options:
+          - { label: Published, value: published }
+          - { label: In development, value: in-development }
+          - { label: Planned, value: planned }
+      - { label: Short description, name: summary, widget: text }
+      - { label: Date, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
+      - *artwork
+      - *draft
+      - *sample
+      - { label: Text, name: body, widget: markdown, required: false }
+
+  # ----------------------------------------------------------- SPIRITUALITY
+  - name: spirituality
+    label: '🕯️ Spirituality posts'
+    label_singular: Post
+    folder: src/content/spirituality
+    create: true
+    slug: '{{year}}-{{month}}-{{slug}}'
+    summary: '{{date}} · {{title}}'
+    sortable_fields: [date, title]
+    view_filters:
+      - { label: Torah thoughts, field: category, pattern: torah }
+      - { label: Faith, field: category, pattern: faith }
+      - { label: Spiritual growth, field: category, pattern: growth }
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Date, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false }
+      - label: Topic
+        name: category
+        widget: select
+        options:
+          - { label: Torah thoughts, value: torah }
+          - { label: Faith, value: faith }
+          - { label: Spiritual growth, value: growth }
+          - { label: Human development, value: human-development }
+          - { label: Divine & psychological ideas, value: ideas }
+      - { label: Torah portion, name: portion, widget: string, required: false, hint: 'e.g. Parashat Bereshit' }
+      - { label: Short description, name: summary, widget: text }
+      - { label: Tags, name: tags, widget: list, required: false }
+      - *draft
+      - *sample
+      - { label: Post, name: body, widget: markdown }
+
+  # -------------------------------------------------------------- WORKSHOPS
+  - name: workshops
+    label: '🎓 Workshops & lectures'
+    label_singular: Workshop or lecture
+    folder: src/content/workshops
+    create: true
+    slug: '{{slug}}'
+    summary: '{{title}} · {{type}} · {{status}}'
+    view_filters:
+      - { label: Upcoming, field: status, pattern: upcoming }
+      - { label: Lectures, field: type, pattern: lecture }
+      - { label: Recordings, field: type, pattern: recording }
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Type
+        name: type
+        widget: select
+        options:
+          - { label: Workshop, value: workshop }
+          - { label: Lecture topic, value: lecture }
+          - { label: Educational program, value: program }
+          - { label: Recording, value: recording }
+      - label: Status
+        name: status
+        widget: select
+        default: on-request
+        options:
+          - { label: Upcoming (shows in the schedule), value: upcoming }
+          - { label: Ongoing, value: ongoing }
+          - { label: Past, value: past }
+          - { label: Available on request, value: on-request }
+      - { label: Short description, name: summary, widget: text }
+      - { label: Starts, name: date, widget: datetime, required: false }
+      - { label: Ends, name: endDate, widget: datetime, required: false }
+      - { label: Location, name: location, widget: string, required: false }
+      - label: Format
+        name: format
+        widget: select
+        required: false
+        options:
+          - { label: In person, value: in-person }
+          - { label: Online, value: online }
+          - { label: Hybrid, value: hybrid }
+      - { label: Price, name: price, widget: string, required: false }
+      - { label: Registration link, name: registrationUrl, widget: string, required: false, hint: Leave empty to send people to the contact form. }
+      - { label: Recording (YouTube link or ID), name: recording, widget: string, required: false }
+      - { label: Topics, name: topics, widget: list, required: false }
+      - *draft
+      - *sample
+      - { label: Details, name: body, widget: markdown, required: false }
+
+  # ----------------------------------------------------------------- VIDEOS
+  - name: videos
+    label: '🎬 Videos'
+    files:
+      - name: videos
+        label: All videos
+        file: src/content/videos.json
+        fields:
+          - label: Videos
+            name: videos
+            widget: list
+            summary: '{{fields.title}} · {{fields.category}}'
+            fields:
+              - { label: Short name (unique, no spaces), name: id, widget: string, hint: 'e.g. first-music-video' }
+              - { label: Title, name: title, widget: string }
+              - label: Category
+                name: category
+                widget: select
+                options:
+                  - { label: Music video, value: music-video }
+                  - { label: Interview, value: interview }
+                  - { label: Lecture, value: lecture }
+                  - { label: Visual story, value: visual-story }
+              - { label: YouTube link or ID, name: youtube, widget: string, required: false }
+              - { label: Description, name: description, widget: text }
+              - { label: Date, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
+              - { <<: *song_relation, label: Linked song (optional), name: song, required: false }
+              - *sample
+
+  # ------------------------------------------------------------------ PAGES
+  - name: pages
+    label: '📄 Pages'
+    description: The longer texts on My Story, Psychology, Lollipop Cruise, Witnessing Groups and Community.
+    editor:
+      preview: true
+    files:
+      - { name: my-story, label: My Story, file: src/content/pages/my-story.md, fields: &page_fields [
+            { label: Title, name: title, widget: string },
+            { label: Small label above the title, name: eyebrow, widget: string, required: false },
+            { label: Description (for Google and link previews), name: description, widget: text },
+            { label: Text, name: body, widget: markdown }
+          ] }
+      - { name: music-essay, label: Essay about music (on My Story), file: src/content/pages/music-essay.md, fields: *page_fields }
+      - { name: psychology, label: Clinical Psychology, file: src/content/pages/psychology.md, fields: *page_fields }
+      - { name: lollipop-cruise, label: Lollipop Cruise introduction, file: src/content/pages/lollipop-cruise.md, fields: *page_fields }
+      - { name: witnessing-groups, label: Witnessing Groups, file: src/content/pages/witnessing-groups.md, fields: *page_fields }
+      - { name: community, label: Community, file: src/content/pages/community.md, fields: *page_fields }
+
+  # ------------------------------------------------------------ HOME + SITE
+  - name: home
+    label: '🏠 Home page'
+    files:
+      - name: home
+        label: Home page text
+        file: src/content/settings/home.json
+        fields:
+          - { label: Small label above the headline, name: eyebrow, widget: string }
+          - { label: Headline, name: headline, widget: string }
+          - { label: Glowing second line, name: headlineAccent, widget: string, required: false }
+          - { label: Introduction, name: intro, widget: text }
+          - { label: Second line under the introduction, name: subline, widget: text, required: false }
+          - label: Main button
+            name: primaryButton
+            widget: object
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: Link, name: url, widget: string }
+          - label: Second button
+            name: secondaryButton
+            widget: object
+            fields:
+              - { label: Label (leave empty to hide), name: label, widget: string, required: false }
+              - { label: Link, name: url, widget: string, required: false }
+          - { label: Show the moving band of section names, name: showMarquee, widget: boolean, default: true }
+          - label: '"One life, several rooms" cards'
+            name: rooms
+            widget: list
+            min: 1
+            max: 3
+            summary: '{{fields.title}}'
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text }
+              - { label: Link, name: url, widget: string }
+              - { label: Link label, name: cta, widget: string }
+          - { label: '"What is The Gathering Place?" sentence', name: gatheringText, widget: text }
+
+  - name: settings
+    label: '⚙️ Site settings'
+    description: Owner area. Admin changes here wait for the Owner's approval.
+    files:
+      - name: site
+        label: Name, social links & announcement
+        file: src/content/settings/site.json
+        fields:
+          - { label: Site name, name: name, widget: string }
+          - { label: Owner name, name: owner, widget: string }
+          - { label: Site description (for Google and link previews), name: description, widget: text }
+          - { label: Public email (optional), name: email, widget: string, required: false }
+          - label: Social links
+            name: socials
+            widget: list
+            summary: '{{fields.label}} · {{fields.url}}'
+            fields:
+              - { label: Name, name: label, widget: string }
+              - { label: Handle or profile name, name: handle, widget: string, required: false }
+              - { label: Link, name: url, widget: string }
+              - label: Icon
+                name: icon
+                widget: select
+                options: [x, soundcloud, youtube, instagram, facebook, spotify, link]
+          - label: Announcement bar
+            name: announcement
+            widget: object
+            hint: A thin banner at the very top of every page, e.g. for a new song or an upcoming workshop.
+            fields:
+              - { label: Show the announcement, name: enabled, widget: boolean, default: false }
+              - { label: Message, name: text, widget: string, required: false }
+              - { label: Link label, name: linkLabel, widget: string, required: false }
+              - { label: Link, name: linkUrl, widget: string, required: false }

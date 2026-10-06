@@ -12,41 +12,17 @@ import sunsetPhoto from '../assets/clifford/sunset-guitar.webp';
 import stagePhoto from '../assets/clifford/stage-microphone.webp';
 import studyPhoto from '../assets/clifford/study-portrait.webp';
 import montagePhoto from '../assets/clifford/gathering-montage.webp';
+import home from '../content/settings/home.json';
 
 const songs = (await getCollection('songs', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
 
-const intro =
-  'Clifford Waldman is a songwriter, clinical psychologist, writer and teacher. This is his home online, where the music, the ideas and the people all come together.';
-
-const worlds = [
-  {
-    title: 'Music & creative work',
-    text: "Songwriting at the heart of it: songs with their lyrics shown beside the music, and the Lollipop Cruise universe.",
-    href: '/music',
-    cta: 'Listen',
-    img: stagePhoto,
-    alt: 'Clifford Waldman singing on stage',
-    pos: '55% 25%',
-  },
-  {
-    title: 'Psychology',
-    text: "A clinical practice, described plainly: the professional side of the work, and a private way to get in touch.",
-    href: '/psychology',
-    cta: 'Clinical practice',
-    img: studyPhoto,
-    alt: 'Clifford Waldman in his study',
-    pos: '40% 30%',
-  },
-  {
-    title: 'Spirituality & teaching',
-    text: "Torah thoughts and reflections on faith and growth, alongside workshops and lectures.",
-    href: '/spirituality',
-    cta: 'Read reflections',
-    img: montagePhoto,
-    alt: 'Clifford Waldman at sunset above Jerusalem, with a Torah scroll and books',
-    pos: '58% 30%',
-  },
+// Text comes from the dashboard (/admin → Home page); the photos stay in order.
+const roomPhotos = [
+  { img: stagePhoto, alt: 'Clifford Waldman singing on stage', pos: '55% 25%' },
+  { img: studyPhoto, alt: 'Clifford Waldman in his study', pos: '40% 30%' },
+  { img: montagePhoto, alt: 'Clifford Waldman at sunset above Jerusalem, with a Torah scroll and books', pos: '58% 30%' },
 ];
+const worlds = home.rooms.map((r, i) => ({ ...r, href: r.url, ...roomPhotos[i % roomPhotos.length] }));
 
 const starts = [
   { from: 'Came from SoundCloud?', to: 'Hear the songs with their lyrics', href: '/music' },
@@ -77,19 +53,20 @@ const starts = [
     </div>
     <div class="wrap home-hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow">Clifford Waldman</span>
-        <h1>Come in. <em class="glow-text">This is where it all gathers.</em></h1>
-        <p class="lede"><Rich text={intro} /></p>
-        <p class="hero-sub">
-          Music and lyrics, writing, clinical psychology, Torah and spiritual reflection, workshops, and a growing
-          community, all under one roof.
-        </p>
+        <span class="eyebrow">{home.eyebrow}</span>
+        <h1>{home.headline} {home.headlineAccent && <em class="glow-text">{home.headlineAccent}</em>}</h1>
+        <p class="lede"><Rich text={home.intro} /></p>
+        {home.subline && <p class="hero-sub">{home.subline}</p>}
         <div class="btn-row">
-          <a class="btn" href="/music">
+          <a class="btn" href={home.primaryButton.url}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg>
-            Listen to the music
+            {home.primaryButton.label}
           </a>
-          <a class="btn btn-ghost" href="/my-story">Read my story</a>
+          {home.secondaryButton.label && (
+            <a class="btn btn-ghost" href={home.secondaryButton.url}>
+              {home.secondaryButton.label}
+            </a>
+          )}
         </div>
         {
           songs[0] && (
@@ -109,6 +86,7 @@ const starts = [
         }
       </div>
     </div>
+    {home.showMarquee && (
     <div class="hero-marquee" aria-hidden="true">
       <div class="marquee-track">
         {
@@ -121,6 +99,7 @@ const starts = [
         }
       </div>
     </div>
+    )}
   </section>
 
   <section class="section doors-section on-dark" aria-labelledby="doors-heading">
@@ -204,7 +183,7 @@ const starts = [
           It's the heart of this site: a place for conversation, questions and shared learning around everything you
           find here. Music, psychology, Torah, creativity, and the people who care about them.
         </p>
-        <p>Music, psychology and faith all grow richer in conversation. This is a place for that conversation to happen.</p>
+        <p>{home.gatheringText}</p>
         <p>The community space is being built now. Join the list and you'll be among the first invited in.</p>
         <a class="link-arrow" href="/community">What's coming</a>
       </div>

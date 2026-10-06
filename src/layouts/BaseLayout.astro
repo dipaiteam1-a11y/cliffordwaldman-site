@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import AnnouncementBar from '../components/AnnouncementBar.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config/site';
@@ -57,6 +58,7 @@ const ogImage = new URL(image.endsWith('.svg') ? '/images/og-default.png' : imag
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+    <AnnouncementBar />
     <Header section={section} />
     <main id="main" tabindex="-1">
       <slot />

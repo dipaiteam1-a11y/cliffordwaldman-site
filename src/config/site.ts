@@ -1,28 +1,29 @@
 /**
- * Site-wide settings. This is the one TypeScript file Clifford may want to edit:
- * social links, navigation labels and form endpoints all live here.
+ * Site-wide settings. Everyday values (name, social links, announcement) live in
+ * src/content/settings/site.json and are edited from the dashboard at /admin.
+ * Navigation and form endpoints stay here.
  */
 
+import settings from '../content/settings/site.json';
+
+/** Name, description, email, social links and the announcement bar: edited in the dashboard (/admin → Site settings). */
 export const site = {
-  name: 'The Gathering Place',
-  owner: 'Clifford Waldman',
+  name: settings.name,
+  owner: settings.owner,
   domain: 'cliffordwaldman.com',
   url: 'https://cliffordwaldman.com',
-  description:
-    'The Gathering Place: home to the music, writing, psychology, spirituality and community work of Clifford Waldman.',
+  description: settings.description,
   // Public contact email is optional. Leave empty to show only the form.
-  email: '',
+  email: settings.email,
 };
 
-/**
- * Social "doors" that lead back here. Replace each URL with Clifford's real profile.
- * They are listed in the README under "Placeholders to fill in".
- */
-export const socials = [
-  { label: 'X', handle: '[TODO: X handle]', url: 'https://x.com/', icon: 'x' },
-  { label: 'SoundCloud', handle: '[TODO: SoundCloud profile]', url: 'https://soundcloud.com/', icon: 'soundcloud' },
-  { label: 'YouTube', handle: '[TODO: YouTube channel]', url: 'https://www.youtube.com/', icon: 'youtube' },
-] as const;
+export type SocialIcon = 'x' | 'soundcloud' | 'youtube' | 'instagram' | 'facebook' | 'spotify' | 'link';
+
+/** Social "doors" that lead back here. */
+export const socials = settings.socials.filter((s) => s.url) as { label: string; handle: string; url: string; icon: SocialIcon }[];
+
+/** Optional site-wide banner, switched on from the dashboard. */
+export const announcement = settings.announcement;
 
 export type NavItem = {
   label: string;

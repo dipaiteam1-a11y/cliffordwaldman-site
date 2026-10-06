@@ -31,10 +31,15 @@ const songs = defineCollection({
      *  - { type: file, src: /audio/my-song.mp3 }    self-hosted in /public/audio
      *  - { type: soundcloud, url: https://soundcloud.com/… }  a SoundCloud track URL
      */
-    audio: z.discriminatedUnion('type', [
-      z.object({ type: z.literal('file'), src: z.string() }),
-      z.object({ type: z.literal('soundcloud'), url: z.url() }),
-    ]),
+    audio: z
+      .object({
+        type: z.enum(['file', 'soundcloud']),
+        src: z.string().optional(),
+        url: z.string().optional(),
+      })
+      .refine((a) => (a.type === 'file' ? !!a.src : /^https?:\/\//.test(a.url ?? '')), {
+        message: 'Audio: upload a file (type "file") or paste a SoundCloud link (type "soundcloud").',
+      }),
     /** Optional YouTube video ID or URL for the song. */
     youtube: z.string().optional(),
     artwork,
@@ -167,7 +172,7 @@ const workshops = defineCollection({
 /* ----------------------------------------------------------------- Videos */
 
 const videos = defineCollection({
-  loader: file('./src/content/videos.json'),
+  loader: file('./src/content/videos.json', { parser: (text) => JSON.parse(text).videos }),
   schema: z.object({
     id: z.string(),
     title: z.string(),

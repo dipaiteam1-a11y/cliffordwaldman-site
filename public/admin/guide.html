@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Owner &amp; Admin guide · The Gathering Place</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --bg: #faf5ec;
+        --raised: #fffcf6;
+        --ink: #1d1612;
+        --soft: #4f4239;
+        --faint: #67584c;
+        --line: #e4d6c0;
+        --accent: #b03a12;
+        --owner: #8a6410;
+        --admin: #2f5f8f;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.65 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+      a { color: var(--accent); }
+      .hero {
+        color: #f6ede1;
+        padding: 3.5rem 1rem 3rem;
+        background:
+          radial-gradient(120% 70% at 50% 115%, rgba(240, 138, 75, 0.35), transparent 62%),
+          radial-gradient(60% 50% at 85% 0%, rgba(124, 82, 170, 0.22), transparent 70%),
+          linear-gradient(180deg, #0d0a12, #1d1316);
+      }
+      .wrap { max-width: 64rem; margin: 0 auto; padding: 0 1rem; }
+      .eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #ffd08a; }
+      h1 { font: 500 clamp(2rem, 5vw, 3rem)/1.1 Georgia, serif; margin: 0.4rem 0 0.6rem; }
+      h2 { font: 500 1.8rem/1.2 Georgia, serif; margin: 2.5rem 0 1rem; }
+      h3 { font: 600 1.25rem/1.3 Georgia, serif; margin: 0 0 0.6rem; }
+      .hero p { color: #d4c6b6; max-width: 40rem; margin: 0; }
+      .btn { display: inline-block; margin-top: 1.4rem; padding: 0.75rem 1.3rem; border-radius: 999px; background: linear-gradient(135deg, #f4a36c, #c2461b); color: #1a0f0a; font-weight: 700; text-decoration: none; }
+      .roles { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); margin-top: -1.75rem; }
+      .card { background: var(--raised); border: 1px solid var(--line); border-radius: 22px; padding: 1.5rem; box-shadow: 0 14px 34px -18px rgba(60, 30, 10, 0.35); }
+      .role-tag { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.3rem 0.75rem; border-radius: 999px; margin-bottom: 0.8rem; }
+      .owner .role-tag { background: rgba(138, 100, 16, 0.12); color: var(--owner); }
+      .admin .role-tag { background: rgba(47, 95, 143, 0.12); color: var(--admin); }
+      .owner { border-top: 4px solid var(--owner); }
+      .admin { border-top: 4px solid var(--admin); }
+      ul.ticks { list-style: none; padding: 0; margin: 0; }
+      ul.ticks li { padding: 0.3rem 0 0.3rem 1.8rem; position: relative; color: var(--soft); }
+      ul.ticks li::before { position: absolute; left: 0; top: 0.3rem; font-weight: 700; }
+      ul.ticks li.yes::before { content: '✓'; color: #2e7d4f; }
+      ul.ticks li.wait::before { content: '⏳'; }
+      ul.ticks li.no::before { content: '✕'; color: #b03a12; }
+      table { width: 100%; border-collapse: collapse; background: var(--raised); border-radius: 18px; overflow: hidden; border: 1px solid var(--line); }
+      th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { background: #f2e9da; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+      td:not(:first-child) { text-align: center; white-space: nowrap; }
+      tr:last-child td { border-bottom: 0; }
+      .flow { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); counter-reset: s; }
+      .step { background: var(--raised); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.1rem; counter-increment: s; }
+      .step::before { content: counter(s); display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%; background: #120e16; color: #ffd08a; font-weight: 700; margin-bottom: 0.5rem; }
+      .step strong { display: block; }
+      .step span { color: var(--soft); font-size: 0.95rem; }
+      .bn { margin-top: 0.4rem; color: var(--faint); font-size: 0.95rem; }
+      .note { background: #fbe6dc; border-left: 4px solid var(--accent); padding: 1rem 1.2rem; border-radius: 0 14px 14px 0; }
+      footer { padding: 3rem 1rem; color: var(--faint); text-align: center; font-size: 0.9rem; }
+      code { background: #f2e9da; padding: 0.05em 0.35em; border-radius: 5px; font-size: 0.92em; }
+      @media (max-width: 40rem) { td, th { padding: 0.6rem; font-size: 0.92rem; } }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow">The Gathering Place · Dashboard</span>
+        <h1>Owner &amp; Admin guide</h1>
+        <p>Who can do what in the dashboard, and how a change travels from a draft to the live site.</p>
+        <p class="bn">ড্যাশবোর্ডে কে কী করতে পারবে, আর একটা পরিবর্তন কীভাবে খসড়া থেকে লাইভ সাইটে যায়।</p>
+        <a class="btn" href="/admin/">Open the dashboard →</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="roles" aria-label="Roles">
+        <article class="card owner">
+          <span class="role-tag">👑 Owner</span>
+          <h3>Full control of the site</h3>
+          <p class="bn">সাইটের পুরো নিয়ন্ত্রণ। সাধারণত Clifford নিজে।</p>
+          <ul class="ticks">
+            <li class="yes">Add, edit and publish everything, straight away</li>
+            <li class="yes">Change site settings, social links, home page and the announcement bar</li>
+            <li class="yes">Edit the Clinical Psychology page</li>
+            <li class="yes">Approve the Admin's changes to protected areas</li>
+            <li class="yes">Delete published content</li>
+            <li class="yes">Add or remove Admins (in GitHub)</li>
+          </ul>
+        </article>
+        <article class="card admin">
+          <span class="role-tag">🛠️ Admin</span>
+          <h3>Runs the content day to day</h3>
+          <p class="bn">প্রতিদিনের কনটেন্ট দেখাশোনা করে।</p>
+          <ul class="ticks">
+            <li class="yes">Add and edit songs, lyrics, chapters, posts, workshops, videos and pages</li>
+            <li class="yes">Upload images and audio while editing an entry</li>
+            <li class="yes">Publish content (it goes live in a few minutes)</li>
+            <li class="wait">Changes to site settings, home page and Psychology wait for the Owner</li>
+            <li class="no">Cannot delete published content</li>
+            <li class="no">Cannot add or remove people</li>
+          </ul>
+        </article>
+      </section>
+
+      <h2>At a glance</h2>
+      <table>
+        <thead>
+          <tr><th>Area of the dashboard</th><th>👑 Owner</th><th>🛠️ Admin</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>🎵 Songs, ⛵ Lollipop Cruise, ✍️ Writing, 🕯️ Spirituality, 🎓 Workshops, 🎬 Videos</td><td>Publish</td><td>Publish</td></tr>
+          <tr><td>📄 Pages: My Story, Lollipop intro, Witnessing Groups, Community</td><td>Publish</td><td>Publish</td></tr>
+          <tr><td>📄 Pages: Clinical Psychology</td><td>Publish</td><td>Needs Owner ✓</td></tr>
+          <tr><td>🏠 Home page text</td><td>Publish</td><td>Needs Owner ✓</td></tr>
+          <tr><td>⚙️ Site settings, social links, announcement bar</td><td>Publish</td><td>Needs Owner ✓</td></tr>
+          <tr><td>🖼️ Media (images, audio)</td><td>Upload &amp; delete</td><td>Upload while editing an entry</td></tr>
+          <tr><td>🗑️ Deleting published entries</td><td>Yes</td><td>No</td></tr>
+          <tr><td>👥 Team (who has access)</td><td>Yes</td><td>No</td></tr>
+        </tbody>
+      </table>
+
+      <h2>How a change goes live</h2>
+      <div class="flow">
+        <div class="step"><strong>Draft</strong><span>Write or edit in the dashboard and press <em>Save</em>. Nothing is public yet.</span></div>
+        <div class="step"><strong>In review</strong><span>Move the card to <em>In review</em> when it's ready for a second look.</span></div>
+        <div class="step"><strong>Ready</strong><span>Move it to <em>Ready</em>. The site is test-built automatically to catch mistakes.</span></div>
+        <div class="step"><strong>Publish</strong><span>Press <em>Publish</em>. A few minutes later it's live on cliffordwaldman.com.</span></div>
+      </div>
+      <p class="bn">খসড়া → রিভিউ → রেডি → পাবলিশ। পাবলিশ করার কয়েক মিনিট পরেই লাইভ সাইটে দেখা যাবে।</p>
+
+      <h2>Good to know</h2>
+      <ul class="ticks">
+        <li class="yes"><strong>Hidden (draft)</strong> switch: keeps an entry off the site even after publishing.</li>
+        <li class="yes"><strong>Example content</strong> switch: the sample entries that came with the site. Turn it off once the entry holds real content.</li>
+        <li class="yes"><strong>Synced lyrics</strong>: put the time before each line, like <code>[00:12.50] First line</code>.</li>
+        <li class="yes"><strong>Nothing is ever lost</strong>: every change is saved in the site's history and can be undone.</li>
+      </ul>
+
+      <h2>Setting up the team (Owner, once)</h2>
+      <div class="note">
+        <p>Access is managed with free GitHub accounts. The Owner owns the site's GitHub repository; each Admin is added as a collaborator. The full step-by-step setup is in the project README, under <strong>“Dashboard, Owner and Admin”</strong>.</p>
+      </div>
+    </main>
+
+    <footer>The Gathering Place · cliffordwaldman.com</footer>
+  </body>
+</html>

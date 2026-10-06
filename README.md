@@ -22,7 +22,8 @@ added without touching code.
 9. [Connecting cliffordwaldman.com](#connecting-the-domain-cliffordwaldmancom)
 10. [Adding a forum to The Gathering Place later](#adding-a-forum-later)
 11. [Accessibility and design notes](#accessibility-and-design-notes)
-12. [Placeholders to fill in](#placeholders-to-fill-in)
+12. [Dashboard, Owner and Admin](#dashboard-owner-and-admin)
+13. [Placeholders to fill in](#placeholders-to-fill-in)
 
 ---
 
@@ -424,6 +425,88 @@ code is prepared for a real community:
   and click-to-load videos), sitemap at `/sitemap-index.xml`.
 
 ---
+
+## Dashboard, Owner and Admin
+
+The site has a content dashboard at **`/admin`** (Decap CMS). Everything can be added or edited there
+without touching code:
+
+| Dashboard section | What it edits |
+|---|---|
+| 🎵 Songs | Title, collection, audio (upload or SoundCloud), synced lyrics, artwork, credits, YouTube, order |
+| ⛵ Lollipop · Chapters / Characters / Stories | The whole universe, linked to songs and to each other |
+| ✍️ Writing & books | Essays, books, literary work, Book of Songs |
+| 🕯️ Spirituality posts | Posts with topic, Torah portion, tags |
+| 🎓 Workshops & lectures | Schedule, lecture topics, programs, recordings, registration links |
+| 🎬 Videos | Every video on the Videos page |
+| 📄 Pages | My Story, music essay, Clinical Psychology, Lollipop intro, Witnessing Groups, Community |
+| 🏠 Home page | Headline, introduction, buttons, the three "rooms" cards, the Gathering Place sentence |
+| ⚙️ Site settings | Site name, description, email, social links (with icons), announcement bar |
+
+A guide for the people using it is built in at `/admin/guide.html`.
+
+### How a change goes live
+
+1. Someone edits in the dashboard and saves: this opens a **draft** (a pull request on GitHub).
+2. Every draft is **test-built** by GitHub Actions (`.github/workflows/site.yml`), so a mistake that
+   would break the site can't be published.
+3. **Publish** merges it into `main`, and the same workflow uploads the new site to the host
+   (FTP to Hostinger). It is live a few minutes later.
+
+### Owner and Admin
+
+Powers come from GitHub, so they can't be bypassed from the browser:
+
+| | 👑 Owner | 🛠️ Admin |
+|---|---|---|
+| Songs, Lollipop, writing, posts, workshops, videos, most pages | Publish | Publish |
+| Clinical Psychology page, Home page, Site settings | Publish | Needs Owner's approval |
+| Delete published entries; delete media | Yes | No |
+| Add or remove people | Yes | No |
+
+- **Owner** = the owner of the GitHub repository (today `dipaiteam1-a11y`; can be transferred to
+  Clifford's account).
+- **Admin** = a collaborator with the **Write** role.
+- Which paths need the Owner is set in `.github/CODEOWNERS`.
+
+### One-time setup (Owner)
+
+1. **Sign-in app.** GitHub → Settings → Developer settings → OAuth Apps → *New OAuth App*:
+   - Homepage URL: `https://cliffordwaldman.com`
+   - Authorization callback URL: `https://cliffordwaldman.com/oauth/callback.php`
+
+   Copy the Client ID and generate a Client secret.
+2. **Store the secret on Hostinger.** In hPanel → File Manager, open the folder *above*
+   `public_html` and create `oauth-secrets.php`:
+   ```php
+   <?php
+   const GITHUB_CLIENT_ID     = 'paste the client ID';
+   const GITHUB_CLIENT_SECRET = 'paste the client secret';
+   ```
+   (Never put this file inside `public_html` or in the repository.)
+3. **Turn on the Owner/Admin rules.** Repository → Settings → Branches → *Add branch protection
+   rule* for `main`:
+   - ✔ Require a pull request before merging (required approvals: 0)
+   - ✔ Require review from Code Owners
+   - ✔ Require status checks to pass: `build`
+   - Leave "Do not allow bypassing the above settings" **off**, so the Owner can publish straight away.
+
+   Branch protection on a **private** repository needs a paid GitHub plan (Pro or Team). On the
+   free plan, either make the repository public (it only holds the website's public content; the
+   sign-in secret is never in it) or skip this step, in which case Admins can publish everything.
+4. **Add an Admin.** Repository → Settings → Collaborators → *Add people* → role **Write**. They need
+   a free GitHub account; they then sign in at `/admin` with it.
+5. **Automatic upload.** Repository → Settings → Secrets and variables → Actions → add secrets
+   `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` (Hostinger hPanel → Files → FTP Accounts). Optional
+   variables: `FTP_SERVER_DIR` (default `public_html/`), `FTP_PROTOCOL` (default `ftps`; use `ftp` if
+   the host refuses FTPS), and the two `PUBLIC_*_FORM_ENDPOINT` values.
+
+**On Netlify instead of Hostinger:** in `public/admin/config.yml` set `base_url: https://api.netlify.com`
+and remove `auth_endpoint`; then add GitHub as an OAuth provider under Netlify → Site configuration →
+Access & security → OAuth. The `/oauth` PHP files are only for PHP hosting.
+
+**Try it locally:** run `npm run dev`, and in a second terminal `npx decap-server`; then open
+`http://localhost:4321/admin`. Changes are written straight to your local files.
 
 ## Placeholders to fill in
 

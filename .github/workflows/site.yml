@@ -1,0 +1,68 @@
+# Builds the site on every pull request (so a broken change can't be published from
+# the dashboard) and deploys to the web host on every change to main.
+name: Build and deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+        env:
+          PUBLIC_CONTACT_FORM_ENDPOINT: ${{ vars.PUBLIC_CONTACT_FORM_ENDPOINT }}
+          PUBLIC_SIGNUP_FORM_ENDPOINT: ${{ vars.PUBLIC_SIGNUP_FORM_ENDPOINT }}
+      - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: site
+          path: dist
+          retention-days: 7
+
+  deploy:
+    # Uploads the built site to Hostinger by FTP. Skipped until the FTP secrets are added
+    # (repository Settings → Secrets and variables → Actions); see README → Deploying.
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - id: ftp
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        run: |
+          if [ -z "$FTP_SERVER" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::FTP_SERVER secret not set yet, so nothing was uploaded."
+          fi
+      - uses: actions/download-artifact@v4
+        if: steps.ftp.outputs.skip != 'true'
+        with:
+          name: site
+          path: dist
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        if: steps.ftp.outputs.skip != 'true'
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./dist/
+          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
