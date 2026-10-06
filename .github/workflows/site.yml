@@ -38,31 +38,34 @@ jobs:
           retention-days: 7
 
   deploy:
-    # Uploads the built site to Hostinger by FTP. Skipped until the FTP secrets are added
-    # (repository Settings → Secrets and variables → Actions); see README → Deploying.
+    # Uploads the built site to the VPS over SSH (rsync). Skipped until the VPS_HOST and
+    # VPS_SSH_KEY secrets are added (scripts/vps/setup.sh prints both); see README → Deploying.
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - id: ftp
+      - id: check
         env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
-          if [ -z "$FTP_SERVER" ]; then
+          if [ -z "$VPS_HOST" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::FTP_SERVER secret not set yet, so nothing was uploaded."
+            echo "::notice::VPS_HOST secret not set yet, so nothing was uploaded."
           fi
       - uses: actions/download-artifact@v4
-        if: steps.ftp.outputs.skip != 'true'
+        if: steps.check.outputs.skip != 'true'
         with:
           name: site
           path: dist
-      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        if: steps.ftp.outputs.skip != 'true'
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
-          local-dir: ./dist/
-          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
+      - name: Upload to the server
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # The server limits this key to the website folder, so "/" here means that folder.
+          rsync -rlz --delete --chmod=D2775,F664 -e "ssh -i ~/.ssh/deploy_key" dist/ "deploy@$VPS_HOST:/"

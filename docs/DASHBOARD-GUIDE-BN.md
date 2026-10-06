@@ -44,8 +44,8 @@
 বিস্তারিত ধাপ README-তে আছে ("Dashboard, Owner and Admin")। সংক্ষেপে:
 
 1. GitHub-এ একটা **OAuth App** বানানো (সাইন-ইনের জন্য)।
-2. Hostinger-এ `public_html`-এর **বাইরে** `oauth-secrets.php` ফাইল রাখা।
+2. VPS-এ `bash /root/oauth.sh` চালিয়ে GitHub থেকে পাওয়া দুটো কোড বসানো (চ্যাটে না)।
 3. GitHub-এ `main` branch-এর **protection rule** চালু করা। এতেই Owner আর Admin-এর ক্ষমতা আলাদা হয়।
    (private repo হলে GitHub-এর পেইড প্ল্যান লাগে, নইলে repo public করতে হবে।)
 4. Admin-কে GitHub-এ **Collaborator (Write)** হিসেবে যোগ করা।
-5. Hostinger-এর FTP তথ্য GitHub Secrets-এ বসানো। এরপর পাবলিশ করলেই সাইট নিজে থেকে আপডেট হবে।
+5. VPS সেটআপ স্ক্রিপ্ট যে দুটো তথ্য (`VPS_HOST`, `VPS_SSH_KEY`) দেখাবে, সেগুলো GitHub Secrets-এ বসানো। এরপর পাবলিশ করলেই সাইট নিজে থেকে আপডেট হবে।

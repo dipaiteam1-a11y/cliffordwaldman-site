@@ -346,7 +346,26 @@ and shows an emergency notice. Web forms are not a secure channel for clinical i
 
 ## Deploying
 
-### Netlify (recommended: forms work with zero setup)
+### VPS (Hostinger KVM or any Ubuntu server) — recommended for this project
+
+1. Buy a VPS with **Ubuntu 24.04** (plain OS, no panel) and point the domain at its IP:
+   DNS **A** records for `@` and `www` → the server's IP address.
+2. Open the server's terminal (Hostinger: hPanel → VPS → *Browser terminal*) and run:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/dipaiteam1-a11y/cliffordwaldman-site/main/scripts/vps/setup.sh | bash
+   ```
+   `scripts/vps/setup.sh` installs Nginx, PHP (only for the dashboard sign-in), free HTTPS,
+   a firewall, fail2ban and automatic security updates, and creates a `deploy` user whose key can
+   only upload into the website folder. If DNS isn't pointing at the server yet, run
+   `bash /root/ssl.sh` later for HTTPS.
+3. The script prints two values. Add them in GitHub → Settings → Secrets and variables → Actions:
+   `VPS_HOST` and `VPS_SSH_KEY`. From then on, every change to `main` (including **Publish** in
+   the dashboard) uploads the new site automatically (`.github/workflows/site.yml`).
+4. Dashboard sign-in: create the GitHub OAuth app (see "Dashboard, Owner and Admin"), then run
+   `bash /root/oauth.sh` on the server and paste the Client ID and secret there. They are stored
+   in `/var/www/oauth-secrets.php`, outside the website folder.
+
+### Netlify
 
 1. Push this repository to GitHub.
 2. In Netlify: **Add new site → Import an existing project →** choose the repository.
@@ -450,8 +469,8 @@ A guide for the people using it is built in at `/admin/guide.html`.
 1. Someone edits in the dashboard and saves: this opens a **draft** (a pull request on GitHub).
 2. Every draft is **test-built** by GitHub Actions (`.github/workflows/site.yml`), so a mistake that
    would break the site can't be published.
-3. **Publish** merges it into `main`, and the same workflow uploads the new site to the host
-   (FTP to Hostinger). It is live a few minutes later.
+3. **Publish** merges it into `main`, and the same workflow uploads the new site to the VPS
+   (rsync over SSH). It is live a few minutes later.
 
 ### Owner and Admin
 
@@ -476,8 +495,9 @@ Powers come from GitHub, so they can't be bypassed from the browser:
    - Authorization callback URL: `https://cliffordwaldman.com/oauth/callback.php`
 
    Copy the Client ID and generate a Client secret.
-2. **Store the secret on Hostinger.** In hPanel → File Manager, open the folder *above*
-   `public_html` and create `oauth-secrets.php`:
+2. **Store the secret on the server.** On the VPS run `bash /root/oauth.sh` (created by
+   `scripts/vps/setup.sh`) and paste the two values. On shared hosting instead, open the folder
+   *above* `public_html` in the file manager and create `oauth-secrets.php`:
    ```php
    <?php
    const GITHUB_CLIENT_ID     = 'paste the client ID';
@@ -496,10 +516,9 @@ Powers come from GitHub, so they can't be bypassed from the browser:
    sign-in secret is never in it) or skip this step, in which case Admins can publish everything.
 4. **Add an Admin.** Repository → Settings → Collaborators → *Add people* → role **Write**. They need
    a free GitHub account; they then sign in at `/admin` with it.
-5. **Automatic upload.** Repository → Settings → Secrets and variables → Actions → add secrets
-   `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` (Hostinger hPanel → Files → FTP Accounts). Optional
-   variables: `FTP_SERVER_DIR` (default `public_html/`), `FTP_PROTOCOL` (default `ftps`; use `ftp` if
-   the host refuses FTPS), and the two `PUBLIC_*_FORM_ENDPOINT` values.
+5. **Automatic upload.** Repository → Settings → Secrets and variables → Actions → add the secrets
+   `VPS_HOST` and `VPS_SSH_KEY` printed by `scripts/vps/setup.sh` (see Deploying → VPS). Optional
+   variables: the two `PUBLIC_*_FORM_ENDPOINT` values.
 
 **On Netlify instead of Hostinger:** in `public/admin/config.yml` set `base_url: https://api.netlify.com`
 and remove `auth_endpoint`; then add GitHub as an OAuth provider under Netlify → Site configuration →
