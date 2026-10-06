@@ -1,11 +1,12 @@
 ---
+import { isPublic } from '../../../lib/visibility';
 import { getCollection, getEntries, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SongCard from '../../../components/SongCard.astro';
 import Rich from '../../../components/Rich.astro';
 
 export async function getStaticPaths() {
-  const chapters = (await getCollection('chapters')).sort((a, b) => a.data.order - b.data.order);
+  const chapters = (await getCollection('chapters', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order);
   return chapters.map((chapter, i) => ({
     params: { slug: chapter.id },
     props: { chapter, prev: chapters[i - 1], next: chapters[i + 1] },
@@ -20,9 +21,9 @@ interface Props {
 const { chapter, prev, next } = Astro.props;
 const d = chapter.data;
 const { Content } = await render(chapter);
-const songs = (await getEntries(d.songs)).filter((s) => !s.data.draft);
-const characters = await getEntries(d.characters);
-const stories = (await getCollection('stories')).filter((s) => s.data.chapter?.id === chapter.id);
+const songs = (await getEntries(d.songs)).filter((s) => isPublic(s.data));
+const characters = (await getEntries(d.characters)).filter((c) => isPublic(c.data));
+const stories = (await getCollection('stories', ({ data }) => isPublic(data))).filter((s) => s.data.chapter?.id === chapter.id);
 const statusText: Record<string, string> = { 'in-progress': 'This chapter is still being written.', future: 'This is a future chapter, coming later.' };
 ---
 

@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's lecture title]"
 type: lecture
 status: on-request

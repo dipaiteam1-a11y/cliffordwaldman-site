@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's workshop title]"
 type: workshop
 status: upcoming

@@ -1,4 +1,5 @@
 ---
+import { isPublic } from '../../lib/visibility';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -7,7 +8,7 @@ import YouTubeLite from '../../components/YouTubeLite.astro';
 import Rich from '../../components/Rich.astro';
 import { formatDate } from '../../lib/format';
 
-const all = await getCollection('workshops', ({ data }) => !data.draft);
+const all = await getCollection('workshops', ({ data }) => isPublic(data));
 const byDate = (a: (typeof all)[number], b: (typeof all)[number]) => (a.data.date?.getTime() ?? 0) - (b.data.date?.getTime() ?? 0);
 const upcoming = all.filter((w) => w.data.status === 'upcoming').sort(byDate);
 const ongoing = all.filter((w) => w.data.status === 'ongoing' || w.data.type === 'program').filter((w) => w.data.status !== 'upcoming' && w.data.status !== 'past');
@@ -53,6 +54,7 @@ const past = all.filter((w) => w.data.status === 'past').sort(byDate).reverse();
         }
       </section>
 
+      {topics.length > 0 && (
       <section class="section ws-section" aria-labelledby="topics-h">
         <div class="section-head">
           <h2 id="topics-h">Lecture topics</h2>
@@ -60,6 +62,7 @@ const past = all.filter((w) => w.data.status === 'past').sort(byDate).reverse();
         </div>
         <div class="grid grid-2">{topics.map((w) => <WorkshopCard w={w} />)}</div>
       </section>
+      )}
 
       <section class="section ws-section" aria-labelledby="prog-h">
         <div class="section-head">
@@ -77,6 +80,7 @@ const past = all.filter((w) => w.data.status === 'past').sort(byDate).reverse();
         </div>
       </section>
 
+      {past.length > 0 && (
       <section class="section ws-section" aria-labelledby="rec-h">
         <div class="section-head">
           <h2 id="rec-h">Recordings</h2>
@@ -98,6 +102,7 @@ const past = all.filter((w) => w.data.status === 'past').sort(byDate).reverse();
           }
         </div>
       </section>
+      )}
     </div>
   </div>
 </BaseLayout>

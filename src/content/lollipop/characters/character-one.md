@@ -1,4 +1,5 @@
 ---
+sample: true
 name: "[Clifford's character name: Character One]"
 role: "[Clifford's one-line role, e.g. who they are on the cruise]"
 summary: "[Clifford's short description of this character]"

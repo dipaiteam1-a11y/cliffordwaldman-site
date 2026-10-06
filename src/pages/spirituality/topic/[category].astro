@@ -1,4 +1,5 @@
 ---
+import { isPublic } from '../../../lib/visibility';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageHero from '../../../components/PageHero.astro';
@@ -12,7 +13,7 @@ export function getStaticPaths() {
 
 const { category } = Astro.params;
 const label = spiritCategoryLabel[category!];
-const posts = (await getCollection('spirituality', ({ data }) => !data.draft && data.category === category)).sort(
+const posts = (await getCollection('spirituality', ({ data }) => isPublic(data) && data.category === category)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );
 ---

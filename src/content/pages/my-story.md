@@ -4,6 +4,13 @@ eyebrow: Personal & professional
 description: "Clifford Waldman's story: music, a lifelong mission, a professional journey through psychology, and the turn toward creativity and spirituality."
 ---
 
+Clifford Waldman's work reaches across music and songwriting, clinical psychology, Torah and spiritual
+reflection, writing and teaching. This page tells the story behind all of it: where it began, the
+mission that runs through it, and how it led to The Gathering Place.
+
+The full story, told in Clifford's own words, is being written now. For the professional side of the
+work, see the [Clinical Psychology](/psychology) page.
+
 ## Where it begins
 
 [Clifford's opening: where the story starts, in his own words.]
@@ -23,7 +30,6 @@ description: "Clifford Waldman's story: music, a lifelong mission, a professiona
 ## Psychology
 
 [Clifford's background in psychology and how it shapes the way he sees people, creativity and growth.]
-For professional details, see the [Clinical Psychology](/psychology) page.
 
 ## Toward creativity and spirituality
 

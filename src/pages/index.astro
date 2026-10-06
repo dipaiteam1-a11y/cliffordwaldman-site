@@ -1,9 +1,11 @@
 ---
+import { isPublic } from '../lib/visibility';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import DoorsMap from '../components/DoorsMap.astro';
 import SongCard from '../components/SongCard.astro';
 import SignupForm from '../components/SignupForm.astro';
+import ComingSoon from '../components/ComingSoon.astro';
 import Rich from '../components/Rich.astro';
 import { Image } from 'astro:assets';
 import sunsetPhoto from '../assets/clifford/sunset-guitar.webp';
@@ -11,14 +13,15 @@ import stagePhoto from '../assets/clifford/stage-microphone.webp';
 import studyPhoto from '../assets/clifford/study-portrait.webp';
 import montagePhoto from '../assets/clifford/gathering-montage.webp';
 
-const songs = (await getCollection('songs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
+const songs = (await getCollection('songs', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
 
-const intro = "[Clifford's one-paragraph introduction: who he is and what he does, in his own voice.]";
+const intro =
+  'Clifford Waldman is a songwriter, clinical psychologist, writer and teacher. This is his home online, where the music, the ideas and the people all come together.';
 
 const worlds = [
   {
     title: 'Music & creative work',
-    text: "[Clifford's sentence about his music and creative world.] Songs with their lyrics shown beside the music, and the Lollipop Cruise universe.",
+    text: "Songwriting at the heart of it: songs with their lyrics shown beside the music, and the Lollipop Cruise universe.",
     href: '/music',
     cta: 'Listen',
     img: stagePhoto,
@@ -27,7 +30,7 @@ const worlds = [
   },
   {
     title: 'Psychology',
-    text: "[Clifford's sentence about his clinical work.] Professional background, areas of work and how to get in touch.",
+    text: "A clinical practice, described plainly: the professional side of the work, and a private way to get in touch.",
     href: '/psychology',
     cta: 'Clinical practice',
     img: studyPhoto,
@@ -36,7 +39,7 @@ const worlds = [
   },
   {
     title: 'Spirituality & teaching',
-    text: "[Clifford's sentence about his spiritual and teaching work.] Torah thoughts, reflections, workshops and lectures.",
+    text: "Torah thoughts and reflections on faith and growth, alongside workshops and lectures.",
     href: '/spirituality',
     cta: 'Read reflections',
     img: montagePhoto,
@@ -172,11 +175,23 @@ const starts = [
           <h2 id="music-heading">Listen with the words beside you</h2>
           <p>Every song page shows the exact lyrics next to the music. The current line lights up as it's sung, and you can select any line to jump to it.</p>
         </div>
-        <a class="link-arrow" href="/music">All songs</a>
+        {songs.length > 0 && <a class="link-arrow" href="/music">All songs</a>}
       </div>
-      <div class="grid grid-3">
-        {songs.map((song) => <SongCard song={song} />)}
-      </div>
+      {
+        songs.length > 0 ? (
+          <div class="grid grid-3">
+            {songs.map((song) => (
+              <SongCard song={song} />
+            ))}
+          </div>
+        ) : (
+          <ComingSoon
+            title="The first songs are on their way"
+            text="When they arrive, each one will play with its lyrics right beside it, the current line glowing as it's sung."
+            cta="Get word when they're released"
+          />
+        )
+      }
     </div>
   </section>
 
@@ -189,7 +204,7 @@ const starts = [
           It's the heart of this site: a place for conversation, questions and shared learning around everything you
           find here. Music, psychology, Torah, creativity, and the people who care about them.
         </p>
-        <p><Rich text="[Clifford's sentence on why he's creating The Gathering Place.]" /></p>
+        <p>Music, psychology and faith all grow richer in conversation. This is a place for that conversation to happen.</p>
         <p>The community space is being built now. Join the list and you'll be among the first invited in.</p>
         <a class="link-arrow" href="/community">What's coming</a>
       </div>

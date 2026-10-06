@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's essay title]"
 kind: essay
 status: published

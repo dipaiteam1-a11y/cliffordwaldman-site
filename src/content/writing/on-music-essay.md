@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's essay title: on music]"
 kind: essay
 status: in-development

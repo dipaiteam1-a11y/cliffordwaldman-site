@@ -1,4 +1,5 @@
 ---
+sample: true
 # ─────────────────────────────────────────────────────────────────────────────
 # SAMPLE SONG. Replace the title, summary, audio and lyrics with the real song.
 # The lyrics below are placeholders with timestamps for testing the player.

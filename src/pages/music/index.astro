@@ -1,11 +1,13 @@
 ---
+import ComingSoon from '../../components/ComingSoon.astro';
+import { isPublic } from '../../lib/visibility';
 import stagePhoto from '../../assets/clifford/stage-microphone.webp';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SongCard from '../../components/SongCard.astro';
 
-const songs = (await getCollection('songs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+const songs = (await getCollection('songs', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order);
 
 const groups = [
   { key: 'lollipop-cruise', title: 'Lollipop Cruise', blurb: 'Songs from the Lollipop Cruise universe.', more: { href: '/lollipop-cruise', label: 'Explore the Lollipop Cruise' } },
@@ -30,6 +32,17 @@ const groups = [
   </PageHero>
 
   <div class="wrap">
+    {
+      songs.length === 0 && (
+        <section class="section">
+          <ComingSoon
+            title="The first songs are on their way"
+            text="Every song will arrive with its lyrics shown beside the music, each line lighting up as it's sung. Select any line to jump straight to it."
+            cta="Get word when they're released"
+          />
+        </section>
+      )
+    }
     <nav class="jump" aria-label="Song collections">
       {groups.map((g) => songs.some((s) => s.data.collection === g.key) && <a href={`#${g.key}`}>{g.title}</a>)}
     </nav>

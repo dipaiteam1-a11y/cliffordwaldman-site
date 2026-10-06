@@ -1,18 +1,20 @@
 ---
+import { isPublic } from '../../lib/visibility';
 import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SongCard from '../../components/SongCard.astro';
 import Rich from '../../components/Rich.astro';
+import ComingSoon from '../../components/ComingSoon.astro';
 
 const intro = (await getEntry('pages', 'lollipop-cruise'))!;
 const { Content: Intro } = await render(intro);
 
-const chapters = (await getCollection('chapters')).sort((a, b) => a.data.order - b.data.order);
+const chapters = (await getCollection('chapters', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order);
 const current = chapters.filter((c) => c.data.status !== 'future');
 const future = chapters.filter((c) => c.data.status === 'future');
-const characters = (await getCollection('characters')).sort((a, b) => a.data.order - b.data.order);
-const stories = (await getCollection('stories')).sort((a, b) => a.data.order - b.data.order);
-const songs = (await getCollection('songs', ({ data }) => !data.draft && data.collection === 'lollipop-cruise')).sort(
+const characters = (await getCollection('characters', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order);
+const stories = (await getCollection('stories', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order);
+const songs = (await getCollection('songs', ({ data }) => isPublic(data) && data.collection === 'lollipop-cruise')).sort(
   (a, b) => a.data.order - b.data.order,
 );
 
@@ -26,11 +28,29 @@ for (const c of current) {
 
 // Artwork gallery: everything in this universe that has art
 const gallery = [
-  { src: '/images/lollipop/cover.svg', alt: 'Lollipop Cruise cover artwork (placeholder)', caption: 'Lollipop Cruise', href: undefined as string | undefined },
+  { src: '/images/lollipop/cover.svg', alt: 'Lollipop Cruise artwork: a swirled lollipop', caption: 'Lollipop Cruise', href: undefined as string | undefined },
   ...chapters.filter((c) => c.data.artwork).map((c) => ({ ...c.data.artwork!, caption: c.data.title, href: `/lollipop-cruise/chapters/${c.id}` })),
   ...characters.filter((c) => c.data.artwork).map((c) => ({ ...c.data.artwork!, caption: c.data.name, href: `/lollipop-cruise/characters/${c.id}` })),
   ...stories.filter((s) => s.data.artwork).map((s) => ({ ...s.data.artwork!, caption: s.data.title, href: `/lollipop-cruise/stories/${s.id}` })),
 ];
+
+const show = {
+  chapters: current.length > 0,
+  characters: characters.length > 0,
+  stories: stories.length > 0,
+  songs: songs.length > 0,
+  artwork: gallery.length > 1,
+  future: future.length > 0,
+};
+const nothingYet = !show.chapters && !show.characters && !show.stories && !show.songs;
+const jump = [
+  ['chapters', 'Chapters'],
+  ['characters', 'Characters'],
+  ['stories', 'Stories'],
+  ['songs', 'Songs'],
+  ['artwork', 'Artwork'],
+  ['future', 'Future chapters'],
+].filter(([id]) => show[id as keyof typeof show]);
 
 const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In progress', future: 'Coming' };
 ---
@@ -42,21 +62,38 @@ const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In 
         <span class="eyebrow">{intro.data.eyebrow}</span>
         <h1>Lollipop Cruise</h1>
         <div class="prose lc-intro"><Intro /></div>
-        <nav class="lc-jump" aria-label="In the Lollipop Cruise">
-          <a href="#chapters">Chapters</a>
-          <a href="#characters">Characters</a>
-          <a href="#stories">Stories</a>
-          <a href="#songs">Songs</a>
-          <a href="#artwork">Artwork</a>
-          <a href="#future">Future chapters</a>
-        </nav>
+        {
+          jump.length > 0 && (
+            <nav class="lc-jump" aria-label="In the Lollipop Cruise">
+              {jump.map(([id, label]) => (
+                <a href={`#${id}`}>{label}</a>
+              ))}
+            </nav>
+          )
+        }
       </div>
       <div class="lc-cover">
-        <img src="/images/lollipop/cover.svg" alt="Lollipop Cruise cover artwork (placeholder)" width="600" height="600" />
+        <img src="/images/lollipop/cover.svg" alt="Lollipop Cruise artwork: a swirled lollipop" width="600" height="600" />
       </div>
     </div>
   </section>
 
+  {
+    nothingYet && (
+      <section class="section">
+        <div class="wrap">
+          <ComingSoon
+            title="The voyage is being charted"
+            text="The first chapters, characters and songs of the Lollipop Cruise are being prepared. Each one will appear here as it's released, all linked together."
+            cta="Get word when the first chapter sails"
+          />
+        </div>
+      </section>
+    )
+  }
+
+  {
+    show.chapters && (
   <section id="chapters" class="section" aria-labelledby="chapters-h">
     <div class="wrap">
       <div class="section-head">
@@ -102,7 +139,11 @@ const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In 
       }
     </div>
   </section>
+    )
+  }
 
+  {
+    show.characters && (
   <section id="characters" class="section section-sunk" aria-labelledby="characters-h">
     <div class="wrap">
       <div class="section-head">
@@ -132,7 +173,11 @@ const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In 
       </div>
     </div>
   </section>
+    )
+  }
 
+  {
+    show.stories && (
   <section id="stories" class="section" aria-labelledby="stories-h">
     <div class="wrap">
       <div class="section-head">
@@ -163,7 +208,11 @@ const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In 
       </div>
     </div>
   </section>
+    )
+  }
 
+  {
+    show.songs && (
   <section id="songs" class="section section-sunk" aria-labelledby="songs-h">
     <div class="wrap">
       <div class="section-head">
@@ -173,7 +222,11 @@ const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In 
       <div class="grid grid-3">{songs.map((song) => <SongCard song={song} />)}</div>
     </div>
   </section>
+    )
+  }
 
+  {
+    show.artwork && (
   <section id="artwork" class="section" aria-labelledby="art-h">
     <div class="wrap">
       <div class="section-head">
@@ -202,7 +255,11 @@ const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In 
       </ul>
     </div>
   </section>
+    )
+  }
 
+  {
+    show.future && (
   <section id="future" class="section section-sunk" aria-labelledby="future-h">
     <div class="wrap">
       <div class="section-head">
@@ -228,6 +285,8 @@ const statusLabel: Record<string, string> = { published: '', 'in-progress': 'In 
       <p><a class="link-arrow" href="/community">Get word when new chapters arrive</a></p>
     </div>
   </section>
+    )
+  }
 </BaseLayout>
 
 <style>

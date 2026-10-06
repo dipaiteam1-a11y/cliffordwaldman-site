@@ -5,27 +5,31 @@
     "category": "music-video",
     "youtube": "",
     "description": "[Clifford's description] Paste the YouTube link or ID in \"youtube\" to show the video.",
-    "song": "sample-song-one"
+    "song": "sample-song-one",
+    "sample": true
   },
   {
     "id": "sample-interview",
     "title": "[Clifford's interview title]",
     "category": "interview",
     "youtube": "",
-    "description": "[Clifford's description of the interview]"
+    "description": "[Clifford's description of the interview]",
+    "sample": true
   },
   {
     "id": "sample-lecture",
     "title": "[Clifford's lecture title]",
     "category": "lecture",
     "youtube": "",
-    "description": "[Clifford's description of the lecture]"
+    "description": "[Clifford's description of the lecture]",
+    "sample": true
   },
   {
     "id": "sample-visual-story",
     "title": "[Clifford's visual story title]",
     "category": "visual-story",
     "youtube": "",
-    "description": "[Clifford's description of this visual story]"
+    "description": "[Clifford's description of this visual story]",
+    "sample": true
   }
 ]

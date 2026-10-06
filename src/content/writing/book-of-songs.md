@@ -11,8 +11,8 @@ summary: "[Clifford's description of the Book of Songs] A collection in developm
 
 ## Songs in the collection
 
-Songs marked as part of the Book of Songs appear below automatically. Each one opens
-with its lyrics shown beside the music.
+Songs from the Book of Songs appear here as they're released, each one with its lyrics shown
+beside the music.
 
 ## Progress
 

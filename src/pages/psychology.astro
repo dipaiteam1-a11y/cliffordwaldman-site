@@ -2,12 +2,14 @@
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactForm from '../components/ContactForm.astro';
+import { visibleSections } from '../lib/visibility';
 import { Image } from 'astro:assets';
 import studyPhoto from '../assets/clifford/study-portrait.webp';
 
 const page = (await getEntry('pages', 'psychology'))!;
 const { Content, headings } = await render(page);
-const toc = headings.filter((h) => h.depth === 2);
+const shown = visibleSections(page.body);
+const toc = headings.filter((h) => h.depth === 2 && shown.has(h.text));
 ---
 
 <BaseLayout title={page.data.title} description={page.data.description}>

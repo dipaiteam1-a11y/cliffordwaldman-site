@@ -1,4 +1,6 @@
 ---
+import ComingSoon from '../components/ComingSoon.astro';
+import { isPublic } from '../lib/visibility';
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
@@ -7,7 +9,7 @@ import Rich from '../components/Rich.astro';
 import { videoCategoryLabel, formatDate } from '../lib/format';
 import { socials } from '../config/site';
 
-const videos = (await getCollection('videos')).sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0));
+const videos = (await getCollection('videos', ({ data }) => isPublic(data))).sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0));
 const categories = ['music-video', 'interview', 'lecture', 'visual-story'] as const;
 const songTitles = new Map<string, string>();
 for (const v of videos) {
@@ -29,6 +31,17 @@ const youtube = socials.find((s) => s.icon === 'youtube');
   </PageHero>
 
   <div class="wrap">
+    {
+      videos.length === 0 && (
+        <section class="section">
+          <ComingSoon
+            title="The first videos are coming"
+            text="Music videos, interviews, lectures and visual stories will be collected here. Each one loads only when you press play, so the page stays quick."
+            cta="Get word when they're up"
+          />
+        </section>
+      )
+    }
     <nav class="cat-jump" aria-label="Video categories">
       {categories.map((c) => videos.some((v) => v.data.category === c) && <a href={`#${c}`}>{videoCategoryLabel[c]}</a>)}
     </nav>

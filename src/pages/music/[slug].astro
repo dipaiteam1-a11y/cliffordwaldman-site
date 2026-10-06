@@ -1,4 +1,5 @@
 ---
+import { isPublic } from '../../lib/visibility';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import LyricsPlayer from '../../components/LyricsPlayer.astro';
@@ -7,7 +8,7 @@ import Rich from '../../components/Rich.astro';
 import { songCollectionLabel } from '../../lib/format';
 
 export async function getStaticPaths() {
-  const songs = (await getCollection('songs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+  const songs = (await getCollection('songs', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order);
   return songs.map((song, i) => ({
     params: { slug: song.id },
     props: { song, prev: songs[i - 1], next: songs[i + 1] },
@@ -24,9 +25,9 @@ const { Content } = await render(song);
 const d = song.data;
 
 // Back-links: chapters, characters and stories that mention this song.
-const chapters = (await getCollection('chapters')).filter((c) => c.data.songs.some((s) => s.id === song.id));
-const characters = (await getCollection('characters')).filter((c) => c.data.songs.some((s) => s.id === song.id));
-const stories = (await getCollection('stories')).filter((s) => s.data.song?.id === song.id);
+const chapters = (await getCollection('chapters', ({ data }) => isPublic(data))).filter((c) => c.data.songs.some((s) => s.id === song.id));
+const characters = (await getCollection('characters', ({ data }) => isPublic(data))).filter((c) => c.data.songs.some((s) => s.id === song.id));
+const stories = (await getCollection('stories', ({ data }) => isPublic(data))).filter((s) => s.data.song?.id === song.id);
 const hasRelated = chapters.length + characters.length + stories.length > 0;
 const backHref = d.collection === 'lollipop-cruise' ? '/lollipop-cruise' : '/music';
 const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All songs';

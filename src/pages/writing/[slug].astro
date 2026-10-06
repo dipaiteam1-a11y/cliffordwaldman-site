@@ -1,4 +1,5 @@
 ---
+import { isPublic } from '../../lib/visibility';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SongCard from '../../components/SongCard.astro';
@@ -6,7 +7,7 @@ import Rich from '../../components/Rich.astro';
 import { formatDate, writingKindLabel } from '../../lib/format';
 
 export async function getStaticPaths() {
-  const items = await getCollection('writing', ({ data }) => !data.draft);
+  const items = await getCollection('writing', ({ data }) => isPublic(data));
   return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
 }
 
@@ -18,7 +19,7 @@ const d = item.data;
 const { Content } = await render(item);
 const songs =
   d.kind === 'book-of-songs'
-    ? (await getCollection('songs', ({ data }) => !data.draft && data.collection === 'book-of-songs')).sort((a, b) => a.data.order - b.data.order)
+    ? (await getCollection('songs', ({ data }) => isPublic(data) && data.collection === 'book-of-songs')).sort((a, b) => a.data.order - b.data.order)
     : [];
 const statusLabel: Record<string, string> = { published: '', 'in-development': 'In development', planned: 'Planned' };
 ---

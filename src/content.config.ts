@@ -50,6 +50,8 @@ const songs = defineCollection({
     /** Sort order in lists (lower comes first). */
     order: z.number().default(100),
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -67,6 +69,8 @@ const chapters = defineCollection({
     songs: z.array(reference('songs')).default([]),
     characters: z.array(reference('characters')).default([]),
     artwork,
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -79,6 +83,8 @@ const characters = defineCollection({
     songs: z.array(reference('songs')).default([]),
     artwork,
     order: z.number().default(100),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -93,6 +99,8 @@ const stories = defineCollection({
     date: z.coerce.date().optional(),
     artwork,
     order: z.number().default(100),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -108,6 +116,8 @@ const writing = defineCollection({
     date: z.coerce.date().optional(),
     artwork,
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -124,6 +134,8 @@ const spirituality = defineCollection({
     summary: z.string(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -147,6 +159,8 @@ const workshops = defineCollection({
     recording: z.string().optional(),
     topics: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -163,6 +177,8 @@ const videos = defineCollection({
     description: z.string(),
     date: z.coerce.date().optional(),
     song: reference('songs').optional(),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 

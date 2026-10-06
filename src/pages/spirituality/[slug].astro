@@ -1,11 +1,12 @@
 ---
+import { isPublic } from '../../lib/visibility';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Rich from '../../components/Rich.astro';
 import { formatDate, spiritCategoryLabel } from '../../lib/format';
 
 export async function getStaticPaths() {
-  const posts = (await getCollection('spirituality', ({ data }) => !data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  const posts = (await getCollection('spirituality', ({ data }) => isPublic(data))).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
   return posts.map((post, i) => ({ params: { slug: post.id }, props: { post, newer: posts[i - 1], older: posts[i + 1] } }));
 }
 

@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's educational program title]"
 type: program
 status: ongoing

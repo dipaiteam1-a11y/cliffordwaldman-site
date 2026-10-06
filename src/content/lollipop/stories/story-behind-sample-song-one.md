@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "The story behind Sample Song One"
 summary: "[Clifford's summary] A sample song-related story, linked to its song and chapter."
 song: sample-song-one

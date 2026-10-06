@@ -411,6 +411,7 @@ main {
 
 .page-hero {
   padding-block: clamp(3.5rem, 9vw, 7rem) clamp(3rem, 7vw, 5rem);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 .page-hero h1 {
   max-width: 18ch;
