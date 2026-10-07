@@ -1,0 +1,17 @@
+{
+  "name": "The Gathering Place",
+  "owner": "Clifford Waldman",
+  "description": "The Gathering Place: home to the music, writing, psychology, spirituality and community work of Clifford Waldman.",
+  "email": "",
+  "socials": [
+    { "label": "X", "handle": "[TODO: X handle]", "url": "https://x.com/", "icon": "x" },
+    { "label": "SoundCloud", "handle": "[TODO: SoundCloud profile]", "url": "https://soundcloud.com/", "icon": "soundcloud" },
+    { "label": "YouTube", "handle": "[TODO: YouTube channel]", "url": "https://www.youtube.com/", "icon": "youtube" }
+  ],
+  "announcement": {
+    "enabled": false,
+    "text": "",
+    "linkLabel": "",
+    "linkUrl": ""
+  }
+}

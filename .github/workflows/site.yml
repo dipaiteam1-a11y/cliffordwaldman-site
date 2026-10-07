@@ -1,0 +1,71 @@
+# Builds the site on every pull request (so a broken change can't be published from
+# the dashboard) and deploys to the web host on every change to main.
+name: Build and deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+        env:
+          PUBLIC_CONTACT_FORM_ENDPOINT: ${{ vars.PUBLIC_CONTACT_FORM_ENDPOINT }}
+          PUBLIC_SIGNUP_FORM_ENDPOINT: ${{ vars.PUBLIC_SIGNUP_FORM_ENDPOINT }}
+      - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: site
+          path: dist
+          retention-days: 7
+
+  deploy:
+    # Uploads the built site to the VPS over SSH (rsync). Skipped until the VPS_HOST and
+    # VPS_SSH_KEY secrets are added (scripts/vps/setup.sh prints both); see README → Deploying.
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - id: check
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          if [ -z "$VPS_HOST" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::VPS_HOST secret not set yet, so nothing was uploaded."
+          fi
+      - uses: actions/download-artifact@v4
+        if: steps.check.outputs.skip != 'true'
+        with:
+          name: site
+          path: dist
+      - name: Upload to the server
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # The server limits this key to the website folder, so "/" here means that folder.
+          rsync -rlz --delete --chmod=D2775,F664 -e "ssh -i ~/.ssh/deploy_key" dist/ "deploy@$VPS_HOST:/"

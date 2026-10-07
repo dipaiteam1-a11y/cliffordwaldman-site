@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "Chapter Three: [Clifford's chapter title]"
 part: 2
 partTitle: "[Clifford's title for Part Two]"

@@ -2,12 +2,20 @@
 /**
  * Renders a plain string, highlighting "[Clifford's … here]" style placeholders.
  * Use for frontmatter text (titles, summaries) that isn't processed as Markdown.
+ * On the public build placeholders are left out (see src/lib/visibility.ts).
  */
 import { splitPlaceholders } from '../lib/format';
+import { showPlaceholders } from '../lib/visibility';
 interface Props {
   text?: string;
 }
 const parts = splitPlaceholders(Astro.props.text ?? '');
+const clean = parts
+  .filter((p) => !p.placeholder)
+  .map((p) => p.text)
+  .join('')
+  .replace(/\s{2,}/g, ' ')
+  .trim();
 ---
 
-{parts.map((p) => (p.placeholder ? <mark class="placeholder">{p.text}</mark> : p.text))}
+{showPlaceholders ? parts.map((p) => (p.placeholder ? <mark class="placeholder">{p.text}</mark> : p.text)) : clean}

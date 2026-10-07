@@ -1,0 +1,21 @@
+# Owner vs Admin (see public/admin/guide.html and README → "Dashboard, Owner and Admin").
+# With branch protection "Require review from Code Owners" switched on, a change to any
+# path owned below needs the Owner's approval before it can go live. Replace the
+# username with Clifford's GitHub account when he takes over as Owner.
+
+# By default, everything (code, design, settings) belongs to the Owner…
+*                                   @dipaiteam1-a11y
+
+# …except everyday content, which Admins may publish themselves.
+/src/content/songs/
+/src/content/lollipop/
+/src/content/writing/
+/src/content/spirituality/
+/src/content/workshops/
+/src/content/videos.json
+/src/content/pages/
+/public/uploads/
+
+# These stay with the Owner even though they are content.
+/src/content/pages/psychology.md    @dipaiteam1-a11y
+/src/content/settings/              @dipaiteam1-a11y

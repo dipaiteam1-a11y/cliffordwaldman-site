@@ -1,12 +1,17 @@
 ---
 /** A clearly marked slot for content Clifford still needs to provide. */
+import { showPlaceholders } from '../lib/visibility';
 interface Props {
   label?: string;
 }
 const { label = 'Placeholder' } = Astro.props;
 ---
 
-<div class="placeholder-block" role="note">
-  <strong>{label}</strong>
-  <slot />
-</div>
+{
+  showPlaceholders && (
+    <div class="placeholder-block" role="note">
+      <strong>{label}</strong>
+      <slot />
+    </div>
+  )
+}

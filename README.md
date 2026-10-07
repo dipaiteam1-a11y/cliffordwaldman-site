@@ -22,7 +22,8 @@ added without touching code.
 9. [Connecting cliffordwaldman.com](#connecting-the-domain-cliffordwaldmancom)
 10. [Adding a forum to The Gathering Place later](#adding-a-forum-later)
 11. [Accessibility and design notes](#accessibility-and-design-notes)
-12. [Placeholders to fill in](#placeholders-to-fill-in)
+12. [Dashboard, Owner and Admin](#dashboard-owner-and-admin)
+13. [Placeholders to fill in](#placeholders-to-fill-in)
 
 ---
 
@@ -162,7 +163,8 @@ line is a little late or early, adjust with `[offset:…]` rather than editing e
 
 ### Sample songs and test audio
 
-`sample-song-one/two/three.md` are test songs with placeholder lyrics. Their audio files
+`sample-song-one/two/three.md` are test songs with placeholder lyrics. Like all example
+content they carry `sample: true`, so they only appear when `PUBLIC_SHOW_PLACEHOLDERS=true`. Their audio files
 (`public/audio/sample-song-*.wav`) are generated tones with a bell on every lyric timestamp.
 Regenerate them with `npm run sample-audio`. When real songs are in, delete the three sample
 `.md` files, the `.wav` files, their artwork in `public/images/songs/`, and
@@ -344,7 +346,26 @@ and shows an emergency notice. Web forms are not a secure channel for clinical i
 
 ## Deploying
 
-### Netlify (recommended: forms work with zero setup)
+### VPS (Hostinger KVM or any Ubuntu server) — recommended for this project
+
+1. Buy a VPS with **Ubuntu 24.04** (plain OS, no panel) and point the domain at its IP:
+   DNS **A** records for `@` and `www` → the server's IP address.
+2. Open the server's terminal (Hostinger: hPanel → VPS → *Browser terminal*) and run:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/dipaiteam1-a11y/cliffordwaldman-site/main/scripts/vps/setup.sh | bash
+   ```
+   `scripts/vps/setup.sh` installs Nginx, PHP (only for the dashboard sign-in), free HTTPS,
+   a firewall, fail2ban and automatic security updates, and creates a `deploy` user whose key can
+   only upload into the website folder. If DNS isn't pointing at the server yet, run
+   `bash /root/ssl.sh` later for HTTPS.
+3. The script prints two values. Add them in GitHub → Settings → Secrets and variables → Actions:
+   `VPS_HOST` and `VPS_SSH_KEY`. From then on, every change to `main` (including **Publish** in
+   the dashboard) uploads the new site automatically (`.github/workflows/site.yml`).
+4. Dashboard sign-in: create the GitHub OAuth app (see "Dashboard, Owner and Admin"), then run
+   `bash /root/oauth.sh` on the server and paste the Client ID and secret there. They are stored
+   in `/var/www/oauth-secrets.php`, outside the website folder.
+
+### Netlify
 
 1. Push this repository to GitHub.
 2. In Netlify: **Add new site → Import an existing project →** choose the repository.
@@ -424,7 +445,112 @@ code is prepared for a real community:
 
 ---
 
+## Dashboard, Owner and Admin
+
+The site has a content dashboard at **`/admin`** (Decap CMS). Everything can be added or edited there
+without touching code:
+
+| Dashboard section | What it edits |
+|---|---|
+| 🎵 Songs | Title, collection, audio (upload or SoundCloud), synced lyrics, artwork, credits, YouTube, order |
+| ⛵ Lollipop · Chapters / Characters / Stories | The whole universe, linked to songs and to each other |
+| ✍️ Writing & books | Essays, books, literary work, Book of Songs |
+| 🕯️ Spirituality posts | Posts with topic, Torah portion, tags |
+| 🎓 Workshops & lectures | Schedule, lecture topics, programs, recordings, registration links |
+| 🎬 Videos | Every video on the Videos page |
+| 📄 Pages | My Story, music essay, Clinical Psychology, Lollipop intro, Witnessing Groups, Community |
+| 🏠 Home page | Headline, introduction, buttons, the three "rooms" cards, the Gathering Place sentence |
+| ⚙️ Site settings | Site name, description, email, social links (with icons), announcement bar |
+
+A guide for the people using it is built in at `/admin/guide.html`.
+
+### How a change goes live
+
+1. Someone edits in the dashboard and saves: this opens a **draft** (a pull request on GitHub).
+2. Every draft is **test-built** by GitHub Actions (`.github/workflows/site.yml`), so a mistake that
+   would break the site can't be published.
+3. **Publish** merges it into `main`, and the same workflow uploads the new site to the VPS
+   (rsync over SSH). It is live a few minutes later.
+
+### Owner and Admin
+
+Powers come from GitHub, so they can't be bypassed from the browser:
+
+| | 👑 Owner | 🛠️ Admin |
+|---|---|---|
+| Songs, Lollipop, writing, posts, workshops, videos, most pages | Publish | Publish |
+| Clinical Psychology page, Home page, Site settings | Publish | Needs Owner's approval |
+| Delete published entries; delete media | Yes | No |
+| Add or remove people | Yes | No |
+
+- **Owner** = the owner of the GitHub repository (today `dipaiteam1-a11y`; can be transferred to
+  Clifford's account).
+- **Admin** = a collaborator with the **Write** role.
+- Which paths need the Owner is set in `.github/CODEOWNERS`.
+
+### One-time setup (Owner)
+
+1. **Sign-in app.** GitHub → Settings → Developer settings → OAuth Apps → *New OAuth App*:
+   - Homepage URL: `https://cliffordwaldman.com`
+   - Authorization callback URL: `https://cliffordwaldman.com/oauth/callback.php`
+
+   Copy the Client ID and generate a Client secret.
+2. **Store the secret on the server.** On the VPS run `bash /root/oauth.sh` (created by
+   `scripts/vps/setup.sh`) and paste the two values. On shared hosting instead, open the folder
+   *above* `public_html` in the file manager and create `oauth-secrets.php`:
+   ```php
+   <?php
+   const GITHUB_CLIENT_ID     = 'paste the client ID';
+   const GITHUB_CLIENT_SECRET = 'paste the client secret';
+   ```
+   (Never put this file inside `public_html` or in the repository.)
+3. **Turn on the Owner/Admin rules.** Repository → Settings → Branches → *Add branch protection
+   rule* for `main`:
+   - ✔ Require a pull request before merging (required approvals: 0)
+   - ✔ Require review from Code Owners
+   - ✔ Require status checks to pass: `build`
+   - Leave "Do not allow bypassing the above settings" **off**, so the Owner can publish straight away.
+
+   Branch protection on a **private** repository needs a paid GitHub plan (Pro or Team). On the
+   free plan, either make the repository public (it only holds the website's public content; the
+   sign-in secret is never in it) or skip this step, in which case Admins can publish everything.
+4. **Add an Admin.** Repository → Settings → Collaborators → *Add people* → role **Write**. They need
+   a free GitHub account; they then sign in at `/admin` with it.
+5. **Automatic upload.** Repository → Settings → Secrets and variables → Actions → add the secrets
+   `VPS_HOST` and `VPS_SSH_KEY` printed by `scripts/vps/setup.sh` (see Deploying → VPS). Optional
+   variables: the two `PUBLIC_*_FORM_ENDPOINT` values.
+
+**On Netlify instead of Hostinger:** in `public/admin/config.yml` set `base_url: https://api.netlify.com`
+and remove `auth_endpoint`; then add GitHub as an OAuth provider under Netlify → Site configuration →
+Access & security → OAuth. The `/oauth` PHP files are only for PHP hosting.
+
+**Try it locally:** run `npm run dev`, and in a second terminal `npx decap-server`; then open
+`http://localhost:4321/admin`. Changes are written straight to your local files.
+
 ## Placeholders to fill in
+
+### What visitors see (and how to see the gaps)
+
+The public site never shows unfinished text:
+
+- **`[Clifford's …]` / `[TODO …]` placeholders are hidden.** In Markdown they are removed, and a
+  heading left with nothing under it is dropped too (tables of contents follow). In titles and
+  summaries they are left out.
+- **Example entries are hidden.** Every sample song, chapter, character, story, post, workshop,
+  video and essay has `sample: true` in its frontmatter. Delete that line (or the file) once it
+  holds real content.
+- **Empty sections show a "coming soon" panel** (`src/components/ComingSoon.astro`) instead of an
+  empty grid, with a link to the mailing list.
+
+To see every placeholder and sample highlighted while filling things in, put
+`PUBLIC_SHOW_PLACEHOLDERS=true` in `.env` and run `npm run dev` (or set the same variable in your
+host's environment for a staging build). Leave it unset for the live site.
+
+The general copy (home page introduction, section descriptions, page intros) was written to fit
+the site and makes no claims about Clifford's life or credentials. Clifford should still read it
+and adjust anything to his own voice.
+
+### The list
 
 Everything below is placeholder text that Clifford needs to replace with his own words or details.
 Nothing here was invented: lyrics, biography, credentials, license numbers and quotes are all
@@ -442,7 +568,7 @@ left for Clifford. Run `npm run placeholders` for the current list with line num
 
 <!-- PLACEHOLDER-LIST:START -->
 
-_163 placeholders in total (generated by `npm run placeholders -- --readme`)._
+_153 placeholders in total (generated by `npm run placeholders -- --readme`)._
 
 **`src/components/YouTubeLite.astro`**
 
@@ -541,21 +667,18 @@ _163 placeholders in total (generated by `npm run placeholders -- --readme`)._
 - [ ] [Clifford's additional training or certifications]
 - [ ] [Clifford's area of work]
 - [ ] [Clifford's description of how he works with clients.]
-- [ ] [Clifford's details: in person / online / both]
+- [ ] [Clifford's format: in person, online, or both]
 - [ ] [Clifford's practice location or region served]
 - [ ] [Clifford's fees and insurance information]
 
 **`src/content/pages/witnessing-groups.md`**
 
 - [ ] [Clifford's description of the program in his own words.]
-- [ ] [Clifford's description of how a session opens.]
-- [ ] [Clifford's description of how feedback is given.]
-- [ ] [Clifford's description of how a session closes.]
 - [ ] [Clifford's description of who the group is for: art forms, experience levels, commitment.]
-- [ ] [TODO: in person / online]
-- [ ] [TODO: number]
-- [ ] [TODO: frequency and start date]
-- [ ] [TODO: fee]
+- [ ] [TODO: format, in person or online]
+- [ ] [TODO: group size]
+- [ ] [TODO: schedule, frequency and start date]
+- [ ] [TODO: cost]
 
 **`src/content/songs/sample-song-one.md`**
 
@@ -692,18 +815,5 @@ _163 placeholders in total (generated by `npm run placeholders -- --readme`)._
 - [ ] [Clifford's essay text. Write in ordinary paragraphs; use `##` for section headings.]
 - [ ] [Clifford's pull-quote, if any]
 - [ ] [Clifford's essay continues.]
-
-**`src/pages/contact.astro`**
-
-- [ ] [TODO: typical reply time, e.g. "Replies usually within a week."]
-
-**`src/pages/index.astro`**
-
-- [ ] [Clifford's one-paragraph introduction: who he is and what he does, in his own voice.]
-- [ ] [Clifford's sentence about his music and creative world.]
-- [ ] [Clifford's sentence about his clinical work.]
-- [ ] [Clifford's sentence about his spiritual and teaching work.]
-- [ ] [Placeholder: portrait photo of Clifford]
-- [ ] [Clifford's sentence on why he's creating The Gathering Place.]
 
 <!-- PLACEHOLDER-LIST:END -->

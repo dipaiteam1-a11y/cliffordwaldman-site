@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Dashboard · The Gathering Place</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      /* Night-hearth touches for the dashboard chrome (login screen and top bar). */
+      :root { color-scheme: light; }
+      body { margin: 0; background: #f6f1e9; }
+      [class*='AuthenticationPage'] { background: radial-gradient(120% 70% at 50% 110%, rgba(240, 138, 75, 0.35), transparent 60%), linear-gradient(180deg, #0d0a12, #1d1316) !important; }
+      [class*='AuthenticationPage'] button { background: linear-gradient(135deg, #f4a36c, #c2461b) !important; color: #1a0f0a !important; font-weight: 700 !important; border-radius: 999px !important; }
+      [class*='AppHeaderContainer'], header[class*='AppHeader'] { background: #120e16 !important; }
+      header[class*='AppHeader'] a, header[class*='AppHeader'] button { color: #f6ede1 !important; }
+      header[class*='AppHeader'] a[class*='active'] { color: #ffd08a !important; }
+      .tgp-guide { position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 300; padding: 0.7rem 1.1rem; border-radius: 999px; background: #120e16; color: #ffd08a; font: 600 14px/1 system-ui, sans-serif; text-decoration: none; box-shadow: 0 10px 30px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(255,208,138,.35); }
+      .tgp-guide:hover { background: #1c1622; }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js"></script>
+    <script>
+      if (window.CMS) CMS.registerPreviewStyle('/admin/preview.css');
+    </script>
+    <a class="tgp-guide" href="/admin/guide.html" target="_blank" rel="noopener">📖 Owner &amp; Admin guide</a>
+  </body>
+</html>

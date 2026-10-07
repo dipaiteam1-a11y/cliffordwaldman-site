@@ -1,44 +1,67 @@
 ---
+import streetPhoto from '../assets/clifford/street-portrait.webp';
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
+import { hasContent, visibleSections } from '../lib/visibility';
 
 const page = (await getEntry('pages', 'my-story'))!;
 const essay = (await getEntry('pages', 'music-essay'))!;
 const { Content } = await render(page);
 const { Content: Essay } = await render(essay);
 const { headings } = await render(page);
-const toc = headings.filter((h) => h.depth === 2);
+const shown = visibleSections(page.body);
+const toc = headings.filter((h) => h.depth === 2 && shown.has(h.text));
+const showEssay = hasContent(essay.body);
 ---
 
 <BaseLayout title={page.data.title} description={page.data.description}>
   <PageHero
     eyebrow={page.data.eyebrow}
     title="My Story"
+    image={streetPhoto}
+    imageAlt="Clifford Waldman in a long dark coat and hat, standing on a city street"
+    imagePosition="50% 22%"
     lede="A personal story and a professional one, told together, because they were never really separate."
   />
 
-  <div class="wrap story-grid">
-    <aside class="story-toc" aria-labelledby="toc-heading">
-      <p id="toc-heading" class="toc-title">On this page</p>
-      <ol>
-        {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
-        <li><a href="#essay">An essay about music</a></li>
-      </ol>
-    </aside>
+  <div class:list={['wrap story-grid', { 'no-toc': toc.length === 0 && !showEssay }]}>
+    {
+      (toc.length > 0 || showEssay) && (
+        <aside class="story-toc" aria-labelledby="toc-heading">
+          <p id="toc-heading" class="toc-title">On this page</p>
+          <ol>
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+            {showEssay && (
+              <li>
+                <a href="#essay">An essay about music</a>
+              </li>
+            )}
+          </ol>
+        </aside>
+      )
+    }
 
     <div>
       <article class="prose">
         <Content />
       </article>
 
-      <section id="essay" class="essay" aria-labelledby="essay-heading">
-        <span class="eyebrow">{essay.data.eyebrow}</span>
-        <h2 id="essay-heading" class="essay-title">An essay about music</h2>
-        <div class="prose essay-body">
-          <Essay />
-        </div>
-      </section>
+      {
+        showEssay && (
+          <section id="essay" class="essay" aria-labelledby="essay-heading">
+            <span class="eyebrow">{essay.data.eyebrow}</span>
+            <h2 id="essay-heading" class="essay-title">An essay about music</h2>
+            <div class="prose essay-body">
+              <Essay />
+            </div>
+          </section>
+        )
+      }
 
       <div class="divider-ornament" aria-hidden="true"></div>
 
@@ -60,6 +83,10 @@ const toc = headings.filter((h) => h.depth === 2);
     .story-grid {
       grid-template-columns: 14rem 1fr;
       gap: 4rem;
+    }
+    .story-grid.no-toc {
+      grid-template-columns: minmax(0, 1fr);
+      max-width: calc(var(--measure) + 2 * var(--gutter) + 18rem);
     }
     .story-toc {
       position: sticky;

@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's book title]"
 kind: book
 status: planned

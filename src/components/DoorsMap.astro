@@ -127,9 +127,11 @@ const placed = doors.map((d, i) => {
     text-align: center;
     padding: 2.5rem 1.5rem;
     border-radius: var(--radius-lg);
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    box-shadow: var(--shadow);
+    background:
+      radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--hearth-2) 40%, transparent), transparent 65%),
+      linear-gradient(180deg, #24182a, #1a1018);
+    border: 1px solid color-mix(in srgb, var(--hearth-1) 40%, transparent);
+    box-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.9), 0 0 60px -20px color-mix(in srgb, var(--hearth-2) 60%, transparent);
     overflow: hidden;
   }
   .hearth-glow {
@@ -139,7 +141,7 @@ const placed = doors.map((d, i) => {
     background:
       radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--hearth-1) 70%, transparent) 0%, transparent 42%),
       radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--hearth-2) 45%, transparent) 0%, transparent 60%);
-    opacity: 0.55;
+    opacity: 0.8;
   }
   @media (prefers-reduced-motion: no-preference) {
     .hearth-glow {
@@ -168,11 +170,13 @@ const placed = doors.map((d, i) => {
     font-weight: 650;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--gold);
     margin-bottom: 0.5rem;
   }
   .hearth-title {
-    font-size: clamp(1.9rem, 3.4vw, 2.5rem);
+    font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+    color: var(--hearth-1);
+    text-shadow: 0 0 30px color-mix(in srgb, var(--hearth-2) 60%, transparent);
     font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 96;
     margin-bottom: 0.4rem;
   }
@@ -206,22 +210,32 @@ const placed = doors.map((d, i) => {
     text-align: center;
     text-decoration: none;
     color: var(--ink);
-    background: var(--bg-raised);
-    border: 1.5px solid color-mix(in srgb, var(--c) 35%, var(--line));
+    background:
+      radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--c) 16%, transparent), transparent 70%),
+      color-mix(in srgb, #1c1622 82%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
     /* the arched doorway */
     border-radius: 50% 50% 14px 14px / 5.5rem 5.5rem 14px 14px;
-    box-shadow: var(--shadow);
-    transition: transform 0.25s, border-color 0.25s, background-color 0.25s;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 24px 44px -24px rgb(0 0 0 / 0.9);
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
   }
   .door a:hover,
   .door a:focus-visible {
     border-color: var(--c);
-    background: color-mix(in srgb, var(--c) 9%, var(--bg-raised));
     color: var(--ink);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 0 0 1px var(--c),
+      0 0 46px -8px color-mix(in srgb, var(--c) 70%, transparent),
+      0 24px 44px -24px rgb(0 0 0 / 0.9);
   }
   @media (prefers-reduced-motion: no-preference) {
     .door a:hover {
-      transform: translateY(-4px);
+      transform: translateY(-6px);
     }
   }
   .door a:focus-visible {
@@ -235,7 +249,8 @@ const placed = doors.map((d, i) => {
     height: 3.3rem;
     border-radius: 999px;
     color: var(--c);
-    background: color-mix(in srgb, var(--c) 12%, transparent);
+    background: radial-gradient(circle, color-mix(in srgb, var(--c) 26%, transparent), color-mix(in srgb, var(--c) 6%, transparent));
+    box-shadow: 0 0 24px -6px color-mix(in srgb, var(--c) 70%, transparent);
     margin-bottom: 0.35rem;
   }
   .door-label {
@@ -267,7 +282,17 @@ const placed = doors.map((d, i) => {
       stroke-width: 1.5;
       stroke-dasharray: 2 7;
       stroke-linecap: round;
-      opacity: 0.55;
+      opacity: 0.7;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .paths line {
+        animation: flow 3s linear infinite;
+      }
+    }
+    @keyframes flow {
+      to {
+        stroke-dashoffset: -18;
+      }
     }
     .hearth {
       position: absolute;
@@ -279,11 +304,12 @@ const placed = doors.map((d, i) => {
       border-radius: 50%;
       padding: 2.5rem;
       border-width: 2px;
-      border-color: color-mix(in srgb, var(--hearth-2) 40%, var(--line));
+      border-color: color-mix(in srgb, var(--hearth-1) 55%, transparent);
       box-shadow:
-        0 0 0 10px color-mix(in srgb, var(--hearth-1) 14%, transparent),
-        0 0 0 22px color-mix(in srgb, var(--hearth-1) 7%, transparent),
-        var(--shadow);
+        0 0 0 12px color-mix(in srgb, var(--hearth-2) 10%, transparent),
+        0 0 0 26px color-mix(in srgb, var(--hearth-2) 5%, transparent),
+        0 0 120px -10px color-mix(in srgb, var(--hearth-2) 55%, transparent),
+        0 40px 80px -30px rgb(0 0 0 / 0.9);
     }
     .doors-nav {
       position: absolute;

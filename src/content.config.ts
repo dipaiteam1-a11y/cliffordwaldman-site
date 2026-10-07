@@ -31,10 +31,15 @@ const songs = defineCollection({
      *  - { type: file, src: /audio/my-song.mp3 }    self-hosted in /public/audio
      *  - { type: soundcloud, url: https://soundcloud.com/… }  a SoundCloud track URL
      */
-    audio: z.discriminatedUnion('type', [
-      z.object({ type: z.literal('file'), src: z.string() }),
-      z.object({ type: z.literal('soundcloud'), url: z.url() }),
-    ]),
+    audio: z
+      .object({
+        type: z.enum(['file', 'soundcloud']),
+        src: z.string().optional(),
+        url: z.string().optional(),
+      })
+      .refine((a) => (a.type === 'file' ? !!a.src : /^https?:\/\//.test(a.url ?? '')), {
+        message: 'Audio: upload a file (type "file") or paste a SoundCloud link (type "soundcloud").',
+      }),
     /** Optional YouTube video ID or URL for the song. */
     youtube: z.string().optional(),
     artwork,
@@ -50,6 +55,8 @@ const songs = defineCollection({
     /** Sort order in lists (lower comes first). */
     order: z.number().default(100),
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -67,6 +74,8 @@ const chapters = defineCollection({
     songs: z.array(reference('songs')).default([]),
     characters: z.array(reference('characters')).default([]),
     artwork,
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -79,6 +88,8 @@ const characters = defineCollection({
     songs: z.array(reference('songs')).default([]),
     artwork,
     order: z.number().default(100),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -93,6 +104,8 @@ const stories = defineCollection({
     date: z.coerce.date().optional(),
     artwork,
     order: z.number().default(100),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -108,6 +121,8 @@ const writing = defineCollection({
     date: z.coerce.date().optional(),
     artwork,
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -124,6 +139,8 @@ const spirituality = defineCollection({
     summary: z.string(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
@@ -147,13 +164,15 @@ const workshops = defineCollection({
     recording: z.string().optional(),
     topics: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 
 /* ----------------------------------------------------------------- Videos */
 
 const videos = defineCollection({
-  loader: file('./src/content/videos.json'),
+  loader: file('./src/content/videos.json', { parser: (text) => JSON.parse(text).videos }),
   schema: z.object({
     id: z.string(),
     title: z.string(),
@@ -163,6 +182,8 @@ const videos = defineCollection({
     description: z.string(),
     date: z.coerce.date().optional(),
     song: reference('songs').optional(),
+    /** Example content shipped with the site; hidden on the public build. */
+    sample: z.boolean().default(false),
   }),
 });
 

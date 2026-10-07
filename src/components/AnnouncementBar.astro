@@ -1,0 +1,95 @@
+---
+/**
+ * Site-wide announcement (a new song, an upcoming workshop…), switched on and
+ * written in the dashboard: /admin → Site settings → Announcement bar.
+ * Visitors can dismiss it; a new message shows again.
+ */
+import { announcement } from '../config/site';
+
+const show = announcement.enabled && announcement.text.trim();
+const key = show ? `ann:${announcement.text}`.slice(0, 120) : '';
+---
+
+{
+  show && (
+    <div class="announcement" data-announcement={key} role="region" aria-label="Announcement">
+      <p>
+        <span class="ann-dot" aria-hidden="true" />
+        {announcement.text}
+        {announcement.linkUrl && announcement.linkLabel && (
+          <a href={announcement.linkUrl}>{announcement.linkLabel}</a>
+        )}
+      </p>
+      <button type="button" class="ann-close" aria-label="Dismiss announcement" data-announcement-close>
+        ×
+      </button>
+    </div>
+  )
+}
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-announcement]');
+  if (bar) {
+    const key = bar.dataset.announcement!;
+    try {
+      if (localStorage.getItem('dismissed') === key) bar.remove();
+    } catch {}
+    bar.querySelector('[data-announcement-close]')?.addEventListener('click', () => {
+      try {
+        localStorage.setItem('dismissed', key);
+      } catch {}
+      bar.remove();
+    });
+  }
+</script>
+
+<style>
+  .announcement {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.55rem 3rem;
+    background: linear-gradient(90deg, #8f2f12, #c2461b 50%, #8f2f12);
+    color: #fff7ec;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  .announcement p {
+    margin: 0;
+  }
+  .announcement a {
+    margin-left: 0.6rem;
+    color: #fff;
+    font-weight: 650;
+  }
+  .ann-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.6rem;
+    border-radius: 50%;
+    background: #ffd08a;
+    box-shadow: 0 0 10px #ffd08a;
+    vertical-align: 0.1em;
+  }
+  .ann-close {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.12);
+    color: inherit;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .ann-close:hover {
+    background: rgb(255 255 255 / 0.25);
+  }
+</style>

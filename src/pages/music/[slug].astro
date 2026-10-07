@@ -1,4 +1,5 @@
 ---
+import { isPublic } from '../../lib/visibility';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import LyricsPlayer from '../../components/LyricsPlayer.astro';
@@ -7,7 +8,7 @@ import Rich from '../../components/Rich.astro';
 import { songCollectionLabel } from '../../lib/format';
 
 export async function getStaticPaths() {
-  const songs = (await getCollection('songs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+  const songs = (await getCollection('songs', ({ data }) => isPublic(data))).sort((a, b) => a.data.order - b.data.order);
   return songs.map((song, i) => ({
     params: { slug: song.id },
     props: { song, prev: songs[i - 1], next: songs[i + 1] },
@@ -24,15 +25,16 @@ const { Content } = await render(song);
 const d = song.data;
 
 // Back-links: chapters, characters and stories that mention this song.
-const chapters = (await getCollection('chapters')).filter((c) => c.data.songs.some((s) => s.id === song.id));
-const characters = (await getCollection('characters')).filter((c) => c.data.songs.some((s) => s.id === song.id));
-const stories = (await getCollection('stories')).filter((s) => s.data.song?.id === song.id);
+const chapters = (await getCollection('chapters', ({ data }) => isPublic(data))).filter((c) => c.data.songs.some((s) => s.id === song.id));
+const characters = (await getCollection('characters', ({ data }) => isPublic(data))).filter((c) => c.data.songs.some((s) => s.id === song.id));
+const stories = (await getCollection('stories', ({ data }) => isPublic(data))).filter((s) => s.data.song?.id === song.id);
 const hasRelated = chapters.length + characters.length + stories.length > 0;
 const backHref = d.collection === 'lollipop-cruise' ? '/lollipop-cruise' : '/music';
 const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All songs';
 ---
 
 <BaseLayout title={d.title} description={d.summary.replace(/\[[^\]]*\]\s*/g, '') || `${d.title}, with synced lyrics.`} image={d.artwork?.src} section="/music">
+  <section class="song-stage on-dark night-sky">
   <div class="wrap song-wrap">
     <a class="back-link" href={backHref}>{backLabel}</a>
     <header class="song-head">
@@ -42,6 +44,10 @@ const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All 
     </header>
 
     <LyricsPlayer title={d.title} lyrics={d.lyrics} audio={d.audio} artwork={d.artwork} />
+  </div>
+  </section>
+
+  <div class="wrap song-rest">
 
     <div class="song-extra">
       <div class="prose">
@@ -127,7 +133,7 @@ const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All 
 
 <style>
   .song-wrap {
-    padding-top: 2.5rem;
+    padding-block: 2.5rem clamp(3rem, 7vw, 5rem);
   }
   .song-head {
     margin-bottom: 2.5rem;
@@ -138,9 +144,7 @@ const backLabel = d.collection === 'lollipop-cruise' ? 'Lollipop Cruise' : 'All 
   .song-extra {
     display: grid;
     gap: 2rem;
-    margin-top: 4rem;
-    padding-top: 3rem;
-    border-top: 1px solid var(--line);
+    margin-top: clamp(3rem, 7vw, 4.5rem);
   }
   @media (min-width: 56rem) {
     .song-extra {

@@ -1,11 +1,13 @@
 ---
+import ComingSoon from '../../components/ComingSoon.astro';
+import { isPublic } from '../../lib/visibility';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import Rich from '../../components/Rich.astro';
 import { formatDate } from '../../lib/format';
 
-const all = (await getCollection('writing', ({ data }) => !data.draft)).sort(
+const all = (await getCollection('writing', ({ data }) => isPublic(data))).sort(
   (a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0),
 );
 const bookOfSongs = all.find((w) => w.data.kind === 'book-of-songs');
@@ -42,8 +44,21 @@ const statusLabel: Record<string, string> = { published: '', 'in-development': '
     }
 
     {
+      !sections.some((s) => all.some((w) => w.data.kind === s.kind)) && (
+        <section class="section">
+          <ComingSoon
+            title="New writing is on the desk"
+            text="Essays, books and literary pieces will be published here as they're finished: shorter pieces on music, psychology, faith and the creative life, and longer works in progress."
+            cta="Get word when something new is published"
+          />
+        </section>
+      )
+    }
+
+    {
       sections.map((s) => {
         const list = all.filter((w) => w.data.kind === s.kind);
+        if (!list.length) return null;
         return (
           <section class="section w-section" aria-labelledby={`${s.kind}-h`}>
             <div class="section-head">

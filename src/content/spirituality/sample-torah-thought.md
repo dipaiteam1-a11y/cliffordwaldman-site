@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's title for this Torah thought]"
 date: 2026-09-20
 category: torah

@@ -1,4 +1,5 @@
 ---
+sample: true
 # SAMPLE SONG. Uses timestamps with fractions of a second.
 title: Sample Song Three
 collection: single

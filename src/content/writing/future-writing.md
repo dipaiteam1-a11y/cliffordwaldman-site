@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's future writing project]"
 kind: future
 status: planned

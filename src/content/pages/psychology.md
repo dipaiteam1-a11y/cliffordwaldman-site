@@ -6,6 +6,9 @@ description: "The clinical psychology practice of Clifford Waldman: background, 
 
 ## Professional identity
 
+This page brings together the professional side of Clifford Waldman's work: his clinical practice,
+and a simple, private way for prospective clients to make an initial inquiry.
+
 [Clifford's professional statement: how he describes his clinical work and approach.]
 
 ## Background
@@ -31,6 +34,12 @@ description: "The clinical psychology practice of Clifford Waldman: background, 
 
 ## Practical details
 
-- **Format:** [Clifford's details: in person / online / both]
-- **Location:** [Clifford's practice location or region served]
-- **Fees & insurance:** [Clifford's fees and insurance information]
+- [Clifford's format: in person, online, or both]
+- [Clifford's practice location or region served]
+- [Clifford's fees and insurance information]
+
+## Making an inquiry
+
+The form below is the best first step. Keep your first message short and general: a few words about
+what you're looking for and how best to reach you is plenty. Please don't include personal health
+details here; those belong in a direct conversation.

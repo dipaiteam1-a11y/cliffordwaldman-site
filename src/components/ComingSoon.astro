@@ -1,0 +1,88 @@
+---
+/**
+ * A warm "on its way" panel for sections that have nothing published yet,
+ * so an empty collection never looks like a broken page.
+ */
+interface Props {
+  title: string;
+  text?: string;
+  cta?: string;
+  href?: string;
+  /** "light" sits on the cream page; "dark" sits on a night band. */
+  tone?: 'light' | 'dark';
+}
+const { title, text, cta = 'Get word when it arrives', href = '/community#join-h', tone = 'light' } = Astro.props;
+---
+
+<div class:list={['coming-soon', tone === 'dark' && 'on-dark-tone']}>
+  <span class="cs-glow" aria-hidden="true"></span>
+  <span class="cs-icon" aria-hidden="true">
+    <svg viewBox="0 0 32 32" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 4c1 5 7 8 7 14a7 7 0 0 1-14 0c0-4 3-5 3-9 2 1 3 3 3 5 1-2 1-6 1-10z" />
+    </svg>
+  </span>
+  <div class="cs-body">
+    <p class="cs-eyebrow">On its way</p>
+    <h3 class="cs-title">{title}</h3>
+    {text && <p class="cs-text">{text}</p>}
+    <slot />
+    {cta && <a class="link-arrow" href={href}>{cta}</a>}
+  </div>
+</div>
+
+<style>
+  .coming-soon {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    padding: clamp(1.5rem, 4vw, 2.25rem);
+    border-radius: var(--radius-lg);
+    background: var(--bg-raised);
+    border: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--line));
+    box-shadow: var(--shadow);
+    max-width: 46rem;
+  }
+  .cs-glow {
+    position: absolute;
+    inset: auto -10% -60% auto;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--hearth-1) 45%, transparent), transparent);
+    z-index: -1;
+  }
+  .cs-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 999px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    box-shadow: 0 0 26px -6px color-mix(in srgb, var(--hearth-2) 70%, transparent);
+  }
+  .cs-eyebrow {
+    margin: 0 0 0.2rem;
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cs-title {
+    margin-bottom: 0.35rem;
+  }
+  .cs-text {
+    color: var(--ink-soft);
+    margin-bottom: 0.9rem;
+    max-width: 34rem;
+  }
+  .on-dark-tone {
+    background: color-mix(in srgb, #1c1622 78%, transparent);
+    border-color: color-mix(in srgb, var(--hearth-1) 35%, transparent);
+  }
+</style>

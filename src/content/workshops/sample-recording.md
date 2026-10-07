@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's recorded lecture title]"
 type: recording
 status: past

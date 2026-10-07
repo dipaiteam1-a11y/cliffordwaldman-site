@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import AnnouncementBar from '../components/AnnouncementBar.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config/site';
@@ -13,7 +14,9 @@ interface Props {
   noindex?: boolean;
 }
 
-const { title, description = site.description, image = '/images/og-default.png', section, noindex = false } = Astro.props;
+const { title, description: rawDescription = site.description, image = '/images/og-default.png', section, noindex = false } = Astro.props;
+// Never put "[Clifford's …]" placeholder text into search results or link previews.
+const description = rawDescription.replace(/\[(?:Clifford['’]s|Clifford |Placeholder|TODO)[^[\]]*\]\s*/g, '').trim() || site.description;
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.owner}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
 // Social networks don't display SVG previews, so fall back to the default PNG.
@@ -55,6 +58,7 @@ const ogImage = new URL(image.endsWith('.svg') ? '/images/og-default.png' : imag
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+    <AnnouncementBar />
     <Header section={section} />
     <main id="main" tabindex="-1">
       <slot />

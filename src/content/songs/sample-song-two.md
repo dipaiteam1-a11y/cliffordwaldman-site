@@ -1,4 +1,5 @@
 ---
+sample: true
 # SAMPLE SONG. Shows a repeated chorus: one lyric line with two timestamps.
 title: Sample Song Two
 collection: book-of-songs

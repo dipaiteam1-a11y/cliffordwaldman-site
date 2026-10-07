@@ -1,4 +1,5 @@
 ---
+sample: true
 title: "[Clifford's post title on spiritual growth]"
 date: 2026-08-28
 category: growth

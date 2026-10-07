@@ -1,11 +1,12 @@
 ---
+import { isPublic } from '../../../lib/visibility';
 import { getCollection, getEntries, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SongCard from '../../../components/SongCard.astro';
 import Rich from '../../../components/Rich.astro';
 
 export async function getStaticPaths() {
-  const characters = await getCollection('characters');
+  const characters = await getCollection('characters', ({ data }) => isPublic(data));
   return characters.map((character) => ({ params: { slug: character.id }, props: { character } }));
 }
 
@@ -15,8 +16,8 @@ interface Props {
 const { character } = Astro.props;
 const d = character.data;
 const { Content } = await render(character);
-const songs = (await getEntries(d.songs)).filter((s) => !s.data.draft);
-const chapters = (await getCollection('chapters'))
+const songs = (await getEntries(d.songs)).filter((s) => isPublic(s.data));
+const chapters = (await getCollection('chapters', ({ data }) => isPublic(data)))
   .filter((c) => c.data.characters.some((ch) => ch.id === character.id))
   .sort((a, b) => a.data.order - b.data.order);
 ---

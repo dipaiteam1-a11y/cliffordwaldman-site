@@ -1,4 +1,5 @@
 ---
+import { showPlaceholders } from '../lib/visibility';
 /**
  * Lightweight YouTube embed: shows a thumbnail and only loads YouTube's player
  * (and its cookies/scripts) after the visitor clicks play.
@@ -29,7 +30,7 @@ const id = youtubeId(video);
   ) : (
     <div class="yt yt-empty" role="note">
       <span class="yt-empty-icon" aria-hidden="true">▶</span>
-      <mark class="placeholder">[TODO: YouTube link for “{title}”]</mark>
+      {showPlaceholders ? <mark class="placeholder">[TODO: YouTube link for “{title}”]</mark> : <span>Video coming soon</span>}
     </div>
   )
 }
